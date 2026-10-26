@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Spec:** [`spec.md`](spec.md) · **Research:** [`research.md`](research.md)
-- **Status:** Rascunho
+- **Status:** Aprovado em 2026-10-26 por Bruno C. Santos
 
 ## 1. Objetivo
 Fazer o lembrete de saída cumprir LEMB-02/03/04/07/10 e garantir que desativar
@@ -53,7 +53,7 @@ e de reinicialização também vão usar.
 
 | Princípio | Atende? | Nota |
 |---|---|---|
-| P1 Spec primeiro | ☐ | aguarda aprovação |
+| P1 Spec primeiro | ✅ | spec aprovada em 2026-10-26 |
 | P2 Lembrete não falha em silêncio | ✅ | foco da mudança |
 | P3 Dados preservados | ✅ | sem mudança de schema |
 | P4 Local-first | ✅ | — |

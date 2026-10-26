@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Rascunho
+- **Status:** Aprovada em 2026-10-26 por Bruno C. Santos
 - **Capacidades afetadas:** `capabilities/lembretes.md`, `capabilities/compromissos.md`
 - **DTs relacionados:** DT-02, DT-06, DT-16, DT-17, DT-19
 
@@ -72,5 +72,5 @@ Corrige violações de **P2** (um lembrete nunca falha em silêncio) e **P6**
 (contratos explícitos). Introduz os primeiros testes unitários (**P7**).
 
 ## 6. Perguntas em aberto
-- [ ] **Q1 — sem alarme exato: bloquear ou salvar mesmo assim?** Recomendo **bloquear**, como está acima: o app nunca aceita um compromisso que não consegue lembrar na hora certa. A alternativa é salvar com um alarme aproximado (pode atrasar alguns minutos) e mostrar um aviso.
-- [ ] **Q2 —** o texto "Permita “Alarmes e lembretes” para o Agora Vai avisar na hora certa." está bom?
+- [x] **Q1 — sem alarme exato: bloquear ou salvar mesmo assim?** Recomendo **bloquear**, como está acima: o app nunca aceita um compromisso que não consegue lembrar na hora certa. A alternativa é salvar com um alarme aproximado (pode atrasar alguns minutos) e mostrar um aviso. **Decisão: bloquear.**
+- [x] **Q2 —** o texto "Permita “Alarmes e lembretes” para o Agora Vai avisar na hora certa." está bom? **Decisão: aprovado.**

@@ -22,6 +22,7 @@ import com.brunocsantos.agoravai.data.NotificationType
 import com.brunocsantos.agoravai.network.RetrofitInstance
 import com.brunocsantos.agoravai.notifications.EXTRA_NOTIFICATION_TYPE
 import com.brunocsantos.agoravai.notifications.NotificationScheduler
+import com.brunocsantos.agoravai.notifications.calcularHorarios
 import com.brunocsantos.agoravai.services.NotificationActionReceiver
 import com.brunocsantos.agoravai.services.geofence.CompromissoGeofenceManager
 import com.brunocsantos.agoravai.utils.SettingsManager
@@ -166,9 +167,8 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
                     val duracaoViagemMinutos = leg.duration.valueInSeconds / 60
                     val tempoSeguranca = currentState.tempoDeSeguranca.toIntOrNull() ?: defaultSafetyTime.value
 
-                    val tempoTotalEtapas = validatedEtapas.filter { it.descricao.isNotBlank() }.sumOf { it.duracaoMinutos.toIntOrNull() ?: 0 }
-                    val minutosNecessariosTotal = duracaoViagemMinutos + tempoSeguranca + tempoTotalEtapas
-                    val horaLimiteInicio = currentState.calendar.timeInMillis - (minutosNecessariosTotal * 60 * 1000)
+                    val duracoesEtapas = validatedEtapas.filter { it.descricao.isNotBlank() }.map { it.duracaoMinutos.toIntOrNull() ?: 0 }
+                    val horaLimiteInicio = calcularHorarios(currentState.calendar.timeInMillis, duracaoViagemMinutos, tempoSeguranca, duracoesEtapas).inicioPreparo
 
                     if (horaLimiteInicio < System.currentTimeMillis()) {
                         val atraso = (System.currentTimeMillis() - horaLimiteInicio) / (1000 * 60)
