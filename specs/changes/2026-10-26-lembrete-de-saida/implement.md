@@ -11,7 +11,7 @@
 | 1 — Testes e cálculo puro | ✅ feito | ver `git log` ("fase 1") | build ✅ · testes 4/4 ✅ |
 | 2 — Agendador e correção dos extras | ✅ feito | ver `git log` ("fase 2") | build ✅ · testes 4/4 ✅ · manual R1, R5 ⏳ (aparelho) |
 | 3 — Tela cheia | ✅ feito | ver `git log` ("fase 3") | build ✅ · testes 4/4 ✅ · manual R2, R3 ⏳ (aparelho) |
-| 4 — Permissão de alarme exato | ⬜ pendente | | |
+| 4 — Permissão de alarme exato | ✅ feito | ver `git log` ("fase 4") | build ✅ · testes 4/4 ✅ · manual R4 ⏳ (aparelho) |
 
 ## Desvios do plano
 - **Fase 2:** criada a constante `EXTRA_ACTION_NOTIFICATION_ID = "EXTRA_NOTIFICATION_ID"` (mesmo valor de antes) para o agendador e o `NotificationActionReceiver` não repetirem o literal (P6). Não muda o comportamento.
@@ -29,6 +29,8 @@
 | LEMB-04.a | ⏳ código inalterado, falta roteiro R2 | — |
 | LEMB-04.b | ⏳ código pronto, falta roteiro R3 | `setContentIntent(fullScreenPendingIntent)` em `AlarmReceiver.showFullScreenAlarm` |
 | LEMB-07.b / .c | ⏳ código pronto, falta roteiro R2 | `ReminderActivity` repassa `EXTRA_ACTION_NOTIFICATION_ID`; `CONFIRM_EXIT` fecha a notificação e cancela a verificação de atraso |
+| LEMB-10.a | ⏳ código pronto, falta roteiro R4 | `salvarCompromisso` checa `podeAgendarExato` antes de qualquer gravação; Snackbar com "Abrir configurações" |
+| LEMB-10.b | ⏳ código pronto, falta roteiro R4 | `toggleCompromisso` retorna antes de gravar e mostra um `Toast` |
 | COMP-10.a, COMP-11.b | ⏳ código pronto, falta roteiro R5 | `pendingVerificacaoAtraso` é a mesma fábrica para agendar e cancelar (com a ação `CHECK_LATE`) |
 
 ## Saída das verificações

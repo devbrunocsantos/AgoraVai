@@ -1,5 +1,9 @@
 package com.brunocsantos.agoravai.ui.compromissos
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +24,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,12 +48,28 @@ fun AddCompromissoScreen(
     val isEditing = uiState.id != null
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val scrollState = rememberScrollState() // Estado de rolagem para a Column
 
     LaunchedEffect(uiState.saveError) {
         uiState.saveError?.let { error ->
             snackbarHostState.showSnackbar(message = error, duration = SnackbarDuration.Short)
             viewModel.dismissError()
+        }
+    }
+
+    // LEMB-10: sem permissão de alarme exato, oferece o atalho para a configuração
+    LaunchedEffect(uiState.pedirPermissaoAlarme) {
+        if (uiState.pedirPermissaoAlarme) {
+            viewModel.onPedidoPermissaoAlarmeExibido()
+            val result = snackbarHostState.showSnackbar(
+                message = MENSAGEM_PERMISSAO_ALARME,
+                actionLabel = "Abrir configurações",
+                duration = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                context.startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${context.packageName}")))
+            }
         }
     }
 

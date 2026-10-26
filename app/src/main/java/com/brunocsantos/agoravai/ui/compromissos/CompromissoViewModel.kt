@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,6 +41,9 @@ import kotlin.random.Random
 
 enum class AddressField { ORIGIN, DESTINATION }
 
+// LEMB-10: mostrado quando o app não pode agendar alarmes exatos
+const val MENSAGEM_PERMISSAO_ALARME = "Permita “Alarmes e lembretes” para o Agora Vai avisar na hora certa."
+
 data class EtapaState(
     val id: Int = System.currentTimeMillis().toInt() + Random.nextInt(),
     var descricao: String = "",
@@ -66,7 +70,8 @@ data class AddCompromissoUiState(
     val tempoDeSeguranca: String = "",
     val deleteAfterComplete: Boolean = false,
     val notificationType: NotificationType = NotificationType.PADRAO,
-    val saveError: String? = null
+    val saveError: String? = null,
+    val pedirPermissaoAlarme: Boolean = false
 )
 
 class CompromissoViewModel(private val dao: AppDao, private val applicationContext: Context) : ViewModel() {
@@ -146,6 +151,8 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
             if (etapa.descricao.isNotBlank() && dur <= 0) etapa.copy(isError = true) else etapa.copy(isError = false)
         }
         if (validatedEtapas.any { it.isError }) { _addCompromissoUiState.update { it.copy(etapas = validatedEtapas) }; return }
+        // LEMB-10: nunca grava um compromisso que não conseguimos lembrar na hora certa
+        if (!CompromissoAlarmScheduler.podeAgendarExato(context)) { _addCompromissoUiState.update { it.copy(pedirPermissaoAlarme = true) }; return }
         val validatedItens = currentState.itensLembrete.filter { it.nome.isNotBlank() }
 
         viewModelScope.launch {
@@ -215,6 +222,11 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
     }
 
     fun toggleCompromisso(c: CompromissoComEtapas, isEnabled: Boolean) {
+        // LEMB-10: sem alarme exato, o compromisso não é reativado (o switch continua desligado)
+        if (isEnabled && !CompromissoAlarmScheduler.podeAgendarExato(applicationContext)) {
+            Toast.makeText(applicationContext, MENSAGEM_PERMISSAO_ALARME, Toast.LENGTH_LONG).show()
+            return
+        }
         viewModelScope.launch {
             val updated = c.compromisso.copy(isEnabled = isEnabled)
             dao.updateCompromisso(updated)
@@ -244,4 +256,5 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
     fun onDateSelected(dateMillis: Long) { val u = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = dateMillis }; val l = _addCompromissoUiState.value.calendar.clone() as Calendar; l.set(u.get(Calendar.YEAR), u.get(Calendar.MONTH), u.get(Calendar.DAY_OF_MONTH)); _addCompromissoUiState.update { it.copy(calendar = l) } }
     fun onTimeSelected(h: Int, m: Int) { val c = _addCompromissoUiState.value.calendar.clone() as Calendar; c.set(Calendar.HOUR_OF_DAY, h); c.set(Calendar.MINUTE, m); _addCompromissoUiState.update { it.copy(calendar = c) } }
     fun dismissError() { _addCompromissoUiState.update { it.copy(saveError = null) } }
+    fun onPedidoPermissaoAlarmeExibido() { _addCompromissoUiState.update { it.copy(pedirPermissaoAlarme = false) } }
 }
