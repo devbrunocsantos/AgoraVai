@@ -119,8 +119,8 @@ infraestrutura (`object`). Estado reativo via `StateFlow`/`SharedFlow`.
 
 | Camada | Tecnologia |
 |---|---|
-| Linguagem / build | Kotlin 2.0.21, AGP 8.11.1, KSP, JVM target 1.8 |
-| UI | Compose BOM 2024.06, Material 3, material-icons-extended |
+| Linguagem / build | Kotlin 1.9.23, AGP 8.4.1, KSP 1.9.23-1.0.19, compilador Compose 1.5.13, Gradle 8.13, JVM target 1.8 (o `gradle/libs.versions.toml` existe mas **não é usado**) |
+| UI | Compose BOM 2024.06.00, Material 3, material-icons-extended |
 | Persistência | Room 2.6.1, SharedPreferences |
 | Background | AlarmManager, WorkManager 2.9, Foreground Service (`dataSync`) |
 | Localização | play-services-location 21.3 (Geofencing, Fused), Places 3.5, Geocoder |
@@ -279,7 +279,7 @@ que as desliga em ordem de prioridade. Deep link simples via extra
 
 ## 8. Build e configuração
 
-1. Criar `local.properties` com `MAPS_API_KEY=<chave>` (Directions + Places habilitadas).
+1. Criar `local.properties` com `MAPS_API_KEY="<chave>"`, **com aspas**, porque o valor é inserido cru no `BuildConfig` (Directions + Places habilitadas). Fora do Android Studio, inclua também `sdk.dir=<caminho do SDK>`.
 2. `./gradlew assembleDebug` / `./gradlew bundleRelease`.
 3. Testes: `./gradlew test` e `./gradlew connectedAndroidTest` (hoje só existem os exemplos do template).
 
@@ -291,7 +291,7 @@ Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠
 
 | # | Severidade | Problema | Onde |
 |---|---|---|---|
-| DT-01 | **Alta** | `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. | `MainActivity.onCreate`, `CompromissoGeofenceManager` |
+| DT-01 | **Alta** | `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. Além disso, os dois managers de geofence só são inicializados pela `MainActivity`, então receivers e workers em segundo plano não conseguem remover geofences (AUTO-08). | `MainActivity.onCreate`, managers de geofence |
 | DT-02 | **Alta** | Chaves de extra divergentes: o ViewModel grava `"EXTRA_TITLE"`, `"EXTRA_MESSAGE"`, `"EXTRA_NOTIFICATION_ID"`, `"EXTRA_HAS_ACTION"`, `"EXTRA_ACTION_INTENT"`, `"EXTRA_ACTION_TITLE"`, mas o `AlarmReceiver` lê as constantes `"extra_title"`, `"extra_message"`… Resultado: o lembrete de saída sai com título/mensagem padrão, ID aleatório e **sem o botão "Já Saí"**. | `CompromissoViewModel.agendarAlarmeSaidaComAction`, `AlarmReceiver` |
 | DT-03 | **Alta** | `fallbackToDestructiveMigration` + `exportSchema=false`: qualquer mudança de schema **apaga todos os dados do usuário**. Os schemas em `app/schemas` (v3, v4) estão desatualizados (DB está na v10). | `AppDatabase` |
 | DT-04 | Alta | Repetição de compromissos (COMP-13) é só armazenada: os alarmes são únicos e não são reagendados para a próxima ocorrência. | `CompromissoViewModel.agendarAlarmes` |
@@ -308,6 +308,7 @@ Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠
 | DT-15 | Baixa | `TimePickerDialog` duplicado (`MainActivity.kt` e `AddCompromissoScreen.kt`); arquivos com várias declarações numa linha só. | UI |
 | DT-16 | Média | Ao confirmar a saída na `ReminderActivity`, o broadcast `CONFIRM_EXIT` vai sem `EXTRA_NOTIFICATION_ID` e a notificação de tela cheia (`ongoing`) continua na bandeja (LEMB-07). | `ReminderActivity.confirmarSaida`, `AlarmReceiver` |
 | DT-17 | Média | Sem permissão de alarme exato (Android 12+), `NotificationScheduler.scheduleAlarm` só registra no log, enquanto os helpers do ViewModel chamam `setExactAndAllowWhileIdle` no `else` e lançam `SecurityException`, que vira "Erro ao salvar." com o compromisso já gravado (LEMB-10). | `NotificationScheduler`, `CompromissoViewModel` |
+| DT-19 | Alta | A notificação de tela cheia não tem `contentIntent`. No Android 14+, sem `USE_FULL_SCREEN_INTENT`, o lembrete vira uma notificação que não abre nada, e o usuário não consegue confirmar a saída (LEMB-04). | `AlarmReceiver.showFullScreenAlarm` |
 | DT-18 | Média | `PomodoroService.onStartCommand` recalcula a meta a cada comando: PAUSE/START sem `EXTRA_CYCLES` trocam a meta da automação pela meta diária (POMO-05). | `PomodoroService` |
 
 ---
@@ -336,3 +337,4 @@ Novas decisões são registradas aqui a partir da fase **Plan** (constituição 
 |---|---|---|
 | 1.0 | 2026-10-25 | Versão inicial, engenharia reversa do código (app 1.5). |
 | 1.1 | 2026-10-26 | Requisitos movidos para `specs/capabilities/` (Spec-Driven Development); DT-16 a DT-18 adicionados. |
+| 1.2 | 2026-10-26 | DT-19 adicionado, DT-01 ampliado, versões reais do build corrigidas (§3.3, §8). |

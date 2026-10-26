@@ -38,9 +38,11 @@ e que tenha a ação "Já Saí".
 
 - Hoje: os itens aparecem, mas a ação "Já Saí" não.
 
-### LEMB-04 · Estilo ALARME — ✅
+### LEMB-04 · Estilo ALARME — ⚠️ DT-19
 ONDE o tipo é `ALARME`, o sistema DEVE abrir uma tela cheia que acende a tela e
 aparece sobre o bloqueio, lista os itens e tem o botão único "JÁ ESTOU SAINDO".
+
+- Hoje: no Android 14+, sem a permissão de tela cheia, o sistema mostra só a notificação, e tocar nela não abre nada (vale também para INSISTENTE e DESAFIO).
 
 ### LEMB-05 · Estilo INSISTENTE — ✅
 ONDE o tipo é `INSISTENTE`, a tela cheia DEVE exigir que o usuário segure o

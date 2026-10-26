@@ -32,10 +32,12 @@ ONDE o gatilho de horário está ligado, o sistema DEVE avaliar a automação
 diariamente por volta de HH:MM. O WorkManager é periódico de 24 h e pode
 atrasar alguns minutos.
 
-### AUTO-05 · Gatilho de local — ✅
+### AUTO-05 · Gatilho de local — ⚠️ DT-05
 ONDE o gatilho de local está ligado, o sistema DEVE monitorar um raio de 100 m
 em volta do local e registrar se o usuário está dentro ou fora. QUANDO o usuário
 entra no raio, o sistema DEVE avaliar a automação.
+
+- Hoje: depois de reiniciar o aparelho, o monitoramento só volta quando o usuário edita ou alterna alguma automação.
 
 ### AUTO-06 · Condições para sugerir — ✅
 Ao avaliar uma automação, o sistema DEVE sugerir a sessão somente se:
@@ -50,9 +52,11 @@ com "Pronto para iniciar sua sessão de '<título>'?" e as ações "Iniciar" e
 "Ignorar". "Iniciar" DEVE começar o Pomodoro com a meta da automação.
 "Ignorar" ou dispensar a notificação DEVE apenas fechá-la.
 
-### AUTO-08 · Automação de uso único — ✅
+### AUTO-08 · Automação de uso único — ⚠️ DT-01
 ONDE a repetição está desligada, depois de sugerir a sessão o sistema DEVE
 arquivar a automação no histórico e remover a geofence dela.
+
+- Hoje: quando isso acontece com o app fechado, a geofence não é removida, porque o `GeofenceManager` só é inicializado pela tela principal.
 
 ### AUTO-09 · Ativar e desativar — ✅ / ⚠️ DT-07
 O switch na lista DEVE ativar ou desativar a automação, reagendando ou

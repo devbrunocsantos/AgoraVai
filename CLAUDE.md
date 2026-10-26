@@ -15,7 +15,7 @@ Comandos: `/spec`, `/research`, `/plan`, `/implement`. Não pule os portões de 
 Nenhum comportamento observável muda sem spec aprovada. Ao concluir uma mudança, as specs vivas precisam refletir o novo comportamento.
 
 ## Build
-- Requer `local.properties` com `MAPS_API_KEY=...`.
+- Requer `local.properties` com `MAPS_API_KEY="..."` (com aspas) e `sdk.dir=...` fora do Android Studio.
 - `./gradlew assembleDebug` · `./gradlew test` · `./gradlew connectedAndroidTest`
 
 ## Cuidados

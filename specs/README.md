@@ -138,13 +138,23 @@ Boas práticas com agentes:
 
 ## Backlog inicial
 
-Requisitos hoje ⚠️ divergentes ou ⬜ planejados, em ordem de impacto:
+Requisitos hoje ⚠️ divergentes ou ⬜ planejados, em ordem de impacto. As correções de bugs já têm spec, research e plano em `changes/`:
+
+| Mudança | Cobre | Situação |
+|---|---|---|
+| [`2026-10-26-lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/) | DT-02, DT-06, DT-16, DT-17, DT-19 | aguardando aprovação |
+| [`2026-10-26-deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/) | DT-01 | aguardando aprovação |
+| [`2026-10-26-reagendar-apos-reiniciar`](changes/2026-10-26-reagendar-apos-reiniciar/) | DT-05 | aguardando aprovação |
+| [`2026-10-26-pomodoro-meta-e-progresso`](changes/2026-10-26-pomodoro-meta-e-progresso/) | DT-07, DT-08, DT-18 | aguardando aprovação |
+
+Backlog completo:
 
 | Mudança sugerida | Requisitos | DT |
 |---|---|---|
 | Corrigir extras do lembrete de saída (título, mensagem, "Já Saí") | LEMB-02, LEMB-03 | DT-02 |
 | Ativar a detecção de chegada | LEMB-09 | DT-01 |
 | Fechar o alarme de tela cheia ao confirmar a saída | LEMB-07 | DT-16 |
+| Tela cheia bloqueada no Android 14 sem como abrir o lembrete | LEMB-04 | DT-19 |
 | Migrações reais do Room | Constituição P3 | DT-03 |
 | Reagendar após reiniciar o aparelho | LEMB-11 | DT-05 |
 | Reagendar compromissos recorrentes | COMP-13 | DT-04 |
