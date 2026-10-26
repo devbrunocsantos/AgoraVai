@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.brunocsantos.agoravai.data.NotificationType
+import com.brunocsantos.agoravai.notifications.EXTRA_ACTION_NOTIFICATION_ID
 import com.brunocsantos.agoravai.services.NotificationActionReceiver
 import com.brunocsantos.agoravai.ui.theme.AgoraVaiTheme
 import kotlinx.coroutines.delay
@@ -54,6 +55,7 @@ class ReminderActivity : ComponentActivity() {
 
         // ID para confirmar a saída
         val compromissoId = intent.getLongExtra("EXTRA_COMPROMISSO_ID", -1L)
+        val notificationId = intent.getIntExtra(EXTRA_ACTION_NOTIFICATION_ID, 0)
 
         setContent {
             AgoraVaiTheme {
@@ -63,7 +65,7 @@ class ReminderActivity : ComponentActivity() {
                     items = items,
                     type = type,
                     onDismiss = {
-                        confirmarSaida(compromissoId)
+                        confirmarSaida(compromissoId, notificationId)
                         finish()
                     }
                 )
@@ -71,11 +73,12 @@ class ReminderActivity : ComponentActivity() {
         }
     }
 
-    private fun confirmarSaida(compromissoId: Long) {
+    private fun confirmarSaida(compromissoId: Long, notificationId: Int) {
         if (compromissoId != -1L) {
             val intent = Intent(this, NotificationActionReceiver::class.java).apply {
                 action = NotificationActionReceiver.Actions.CONFIRM_EXIT.toString()
                 putExtra("EXTRA_COMPROMISSO_ID", compromissoId)
+                putExtra(EXTRA_ACTION_NOTIFICATION_ID, notificationId) // Fecha a notificação do alarme
             }
             sendBroadcast(intent)
         }

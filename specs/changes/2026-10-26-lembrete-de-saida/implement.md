@@ -10,11 +10,12 @@
 |---|---|---|---|
 | 1 — Testes e cálculo puro | ✅ feito | ver `git log` ("fase 1") | build ✅ · testes 4/4 ✅ |
 | 2 — Agendador e correção dos extras | ✅ feito | ver `git log` ("fase 2") | build ✅ · testes 4/4 ✅ · manual R1, R5 ⏳ (aparelho) |
-| 3 — Tela cheia | ⬜ pendente | | |
+| 3 — Tela cheia | ✅ feito | ver `git log` ("fase 3") | build ✅ · testes 4/4 ✅ · manual R2, R3 ⏳ (aparelho) |
 | 4 — Permissão de alarme exato | ⬜ pendente | | |
 
 ## Desvios do plano
 - **Fase 2:** criada a constante `EXTRA_ACTION_NOTIFICATION_ID = "EXTRA_NOTIFICATION_ID"` (mesmo valor de antes) para o agendador e o `NotificationActionReceiver` não repetirem o literal (P6). Não muda o comportamento.
+- **Fase 3:** a notificação de tela cheia passou de `setAutoCancel(true)` para `false`. Com o novo `contentIntent`, o auto-cancel faria a notificação sumir no toque. Se o usuário fechasse a tela sem confirmar, perderia o caminho de volta. Agora ela só some ao confirmar, que é o que LEMB-07 pede.
 
 ## Critérios de aceite
 
@@ -25,6 +26,9 @@
 | COMP-07.a (regressão do cálculo) | ✅ | `HorariosLembreteTest` |
 | LEMB-02.a / .b | ⏳ código pronto, falta roteiro R1 | `CompromissoAlarmScheduler.agendarSaida` usa as constantes `EXTRA_TITLE`/`EXTRA_MESSAGE` |
 | LEMB-03.a / .b | ⏳ código pronto, falta roteiro R1 | `EXTRA_HAS_ACTION`/`EXTRA_ACTION_INTENT`/`EXTRA_ACTION_TITLE` corretos; `EXTRA_NOTIFICATION_ID` = `id*100+99`, o mesmo que a ação "Já Saí" fecha |
+| LEMB-04.a | ⏳ código inalterado, falta roteiro R2 | — |
+| LEMB-04.b | ⏳ código pronto, falta roteiro R3 | `setContentIntent(fullScreenPendingIntent)` em `AlarmReceiver.showFullScreenAlarm` |
+| LEMB-07.b / .c | ⏳ código pronto, falta roteiro R2 | `ReminderActivity` repassa `EXTRA_ACTION_NOTIFICATION_ID`; `CONFIRM_EXIT` fecha a notificação e cancela a verificação de atraso |
 | COMP-10.a, COMP-11.b | ⏳ código pronto, falta roteiro R5 | `pendingVerificacaoAtraso` é a mesma fábrica para agendar e cancelar (com a ação `CHECK_LATE`) |
 
 ## Saída das verificações

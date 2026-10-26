@@ -65,6 +65,7 @@ class AlarmReceiver : BroadcastReceiver() {
             putExtra("EXTRA_TYPE", typeOrdinal)
             putStringArrayListExtra("EXTRA_ITEMS", items) // Passa a lista de itens
             putExtra("EXTRA_COMPROMISSO_ID", compromissoId) // Passa o ID
+            putExtra(EXTRA_ACTION_NOTIFICATION_ID, notificationId) // Para fechar a notificação ao confirmar (LEMB-07)
         }
 
         val fullScreenPendingIntent = PendingIntent.getActivity(
@@ -81,7 +82,10 @@ class AlarmReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setFullScreenIntent(fullScreenPendingIntent, true) // Acorda a tela
-            .setAutoCancel(true)
+            // Se o sistema não abrir a tela cheia (Android 14+ sem permissão), o toque abre o lembrete (LEMB-04)
+            .setContentIntent(fullScreenPendingIntent)
+            // Só sai da bandeja quando a saída é confirmada (LEMB-07)
+            .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
 
