@@ -2,7 +2,7 @@
 
 - **Spec:** [`spec.md`](spec.md) · **Plano:** [`plan.md`](plan.md)
 - **Branch:** `ccr-80e3a1a2-ocxhin`
-- **Início / fim:** 2026-10-26 / —
+- **Início / fim:** 2026-10-26 / — (código concluído em 2026-10-26; faltam os roteiros manuais)
 
 ## Progresso por fase
 
@@ -41,10 +41,11 @@ HorariosLembreteTest: tests=4 failures=0 errors=0
 ```
 
 ## Incorporação nas specs vivas
-- [ ] Delta incorporado em `specs/capabilities/lembretes.md` e `compromissos.md`
-- [ ] `specs/architecture.md` atualizado
-- [ ] `spec.md` marcada como **Concluída**
+- [x] Delta incorporado em `specs/capabilities/lembretes.md` e `compromissos.md`, com status 🧪 até os roteiros passarem
+- [x] `specs/architecture.md` atualizado (DTs 🧪, §3.2, §5.2, DT-20, histórico 1.3)
+- [ ] `spec.md` marcada como **Concluída**: depois dos roteiros R1–R5. Ao passarem, trocar 🧪 por ✅ nas specs vivas e riscar os DTs.
 
 ## Pendências / follow-ups
 - `PomodoroWorker` ainda usa o literal `"EXTRA_NOTIFICATION_ID"` (mesmo valor da constante; funciona). Trocar numa mudança do Pomodoro.
-- Achado novo: `CompromissoViewModel.tempLatDestino/tempLngDestino` são campos do ViewModel que não são zerados entre salvamentos. Se o Geocoder falhar ao salvar um compromisso, ele herda as coordenadas do anterior. Afeta LEMB-09 → registrar como DT-20 ao concluir.
+- Achado novo, registrado como **DT-20**: `tempLatDestino/tempLngDestino` não são zerados entre salvamentos. Convém corrigir junto com a mudança `deteccao-de-chegada`, que depende das coordenadas.
+- Diagnóstico de permissões (SIS-05) ainda não mostra a permissão de tela cheia do Android 14 (fora de escopo na spec).

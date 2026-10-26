@@ -61,7 +61,7 @@ salvar, ENTÃO o sistema DEVE usar o padrão global.
 SE o início do preparo for anterior ao momento atual, ENTÃO o sistema DEVE exibir
 "Impossível! Atraso de N min." (N = minutos inteiros de atraso) e não salvar.
 
-- **a.** Dado um evento às 10:00, 30 min de deslocamento, 15 de segurança e 20 de etapas, quando salvo às 9:00, então vejo "Impossível! Atraso de 5 min.".
+- **a.** Dado um evento às 10:00, 30 min de deslocamento, 15 de segurança e 20 de etapas, quando salvo às 9:00, então vejo "Impossível! Atraso de 5 min.". *(teste do cálculo: `HorariosLembreteTest`)*
 
 ### COMP-08 · Coordenadas do destino — ✅
 QUANDO o usuário salva, o sistema DEVE tentar obter latitude/longitude do destino
@@ -73,22 +73,26 @@ QUANDO o usuário toca em editar, o sistema DEVE abrir o formulário preenchido.
 Ao salvar, o sistema DEVE substituir etapas e itens, zerar `confirmouSaida` e
 `confirmouChegada`, cancelar alarmes e geofence antigos e agendar os novos.
 
-### COMP-10 · Ativar e desativar — ✅
+### COMP-10 · Ativar e desativar — 🧪
 QUANDO o usuário desliga o switch, o sistema DEVE cancelar os alarmes e a
 geofence do compromisso e exibi-lo esmaecido. QUANDO religa, o sistema DEVE
-reagendar alarmes e geofence.
+reagendar alarmes e geofence (sujeito a LEMB-10).
+
+- **a.** Dado um compromisso desativado antes do horário de saída, quando passa o horário de saída + 10 min, então nenhum lembrete de saída nem aviso de atraso aparece.
+- 🧪 Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R5.
 
 > Observação: religar um compromisso cujo horário já passou agenda alarmes no
 > passado, e o `AlarmManager` dispara na hora. Nenhum requisito cobre esse
 > caso ainda (pergunta em aberto).
 
-### COMP-11 · Exclusão — ✅
+### COMP-11 · Exclusão — 🧪
 QUANDO o usuário toca em excluir, o sistema DEVE pedir confirmação ("Tem certeza
 de que deseja excluir o compromisso "<título>"? Todas as notificações agendadas
 serão canceladas."). Ao confirmar, o sistema DEVE apagar o compromisso, suas
 etapas e itens (cascata) e cancelar alarmes e geofence.
 
-- **a.** ⚠️ O alarme de verificação de atraso não é cancelado (DT-06). Hoje é inofensivo porque ele não encontra o compromisso.
+- **b.** Dado um compromisso excluído, quando passa o horário de saída + 10 min, então nenhum aviso de atraso aparece.
+- 🧪 Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R5.
 
 ### COMP-12 · Lista — ✅
 O sistema DEVE listar os compromissos em ordem crescente de data/hora, com

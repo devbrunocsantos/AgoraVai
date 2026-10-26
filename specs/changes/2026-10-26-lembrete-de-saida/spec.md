@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Aprovada em 2026-10-26 por Bruno C. Santos
+- **Status:** Implementada em 2026-10-26 — aguardando roteiros manuais (R1–R5) para ser Concluída · Aprovada em 2026-10-26 por Bruno C. Santos
 - **Capacidades afetadas:** `capabilities/lembretes.md`, `capabilities/compromissos.md`
 - **DTs relacionados:** DT-02, DT-06, DT-16, DT-17, DT-19
 

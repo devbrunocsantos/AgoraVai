@@ -69,6 +69,7 @@ teste que o cobre, o que mantém a rastreabilidade spec → teste.
 |---|---|
 | ✅ Implementado | O código cumpre o requisito |
 | ⚠️ Divergente | O código existe mas não cumpre. Aponta para um `DT-xx` em `architecture.md` |
+| 🧪 Aguardando verificação | O código foi corrigido ou implementado, mas algum critério ainda depende de verificação (ex.: roteiro manual em aparelho). Vira ✅ quando todos os critérios passam |
 | ⬜ Planejado | Especificado mas não implementado |
 | 🗑️ Removido | Mantido só para histórico (o ID não é reutilizado) |
 
@@ -142,7 +143,7 @@ Requisitos hoje ⚠️ divergentes ou ⬜ planejados, em ordem de impacto. As co
 
 | Mudança | Cobre | Situação |
 |---|---|---|
-| [`2026-10-26-lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/) | DT-02, DT-06, DT-16, DT-17, DT-19 | aguardando aprovação |
+| [`2026-10-26-lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/) | DT-02, DT-06, DT-16, DT-17, DT-19 | implementada, aguardando roteiros manuais |
 | [`2026-10-26-deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/) | DT-01 | aguardando aprovação |
 | [`2026-10-26-reagendar-apos-reiniciar`](changes/2026-10-26-reagendar-apos-reiniciar/) | DT-05 | aguardando aprovação |
 | [`2026-10-26-pomodoro-meta-e-progresso`](changes/2026-10-26-pomodoro-meta-e-progresso/) | DT-07, DT-08, DT-18 | aguardando aprovação |
