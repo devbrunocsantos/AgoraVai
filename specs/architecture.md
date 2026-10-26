@@ -1,17 +1,18 @@
-# SDD — Software Design Document · Agora Vai
+# Arquitetura · Agora Vai
 
 | Campo | Valor |
 |---|---|
 | Projeto | Agora Vai (`com.brunocsantos.agoravai`) |
 | Plataforma | Android nativo (Kotlin + Jetpack Compose) |
 | Versão do app | 1.5 (`versionCode 6`) |
-| Versão do documento | 1.0 — 2026-10-25 |
+| Versão do documento | 1.1 — 2026-10-26 |
 | Autor | Bruno C. Santos |
-| Status | Documento *as-is*: descreve o sistema como ele está hoje no código |
+| Status | *As-is*: descreve o design técnico como ele está hoje no código |
 
-> Este SDD é a **fonte da verdade da especificação** do projeto. Toda mudança
-> relevante passa pelo fluxo RPI ([`docs/rpi/README.md`](rpi/README.md)) e,
-> ao final, atualiza este documento.
+> Este documento descreve **como** o sistema é construído. **O que** o sistema
+> deve fazer está nas specs vivas em [`capabilities/`](capabilities); os
+> princípios estão na [`constitution.md`](constitution.md) e o fluxo de
+> mudança em [`README.md`](README.md) (Spec-Driven Development + RPI).
 
 ---
 
@@ -54,60 +55,15 @@ dispositivos, widgets, Wear OS.
 
 ## 2. Requisitos
 
-### 2.1 Requisitos funcionais
+Os requisitos ficam nas specs vivas, com ID, formato EARS, critérios de aceite e status:
 
-**Compromissos**
-
-| ID | Requisito |
-|---|---|
-| RF-01 | O usuário cria, edita, ativa/desativa e exclui compromissos (título, data, hora, origem, destino). |
-| RF-02 | Origem e destino têm autocomplete (Places) e botão "usar localização atual" (Fused Location + Geocoder reverso). |
-| RF-03 | Ao salvar, o app consulta a Directions API e grava o tempo de deslocamento em minutos. Sem rota → erro "Rota não encontrada.". |
-| RF-04 | O usuário define um tempo de segurança (padrão global em Configurações, 15 min). |
-| RF-05 | O usuário cadastra etapas ordenáveis (descrição + minutos). Etapa com descrição e duração ≤ 0 é inválida. |
-| RF-06 | O usuário cadastra itens a não esquecer (padrão: Chaves, Carteira, Documentos). |
-| RF-07 | Se o horário para começar a primeira etapa já passou, o salvamento é bloqueado com "Impossível! Atraso de N min.". |
-| RF-08 | Cada etapa gera um alarme exato no horário em que ela deve começar (encadeadas de trás para frente a partir do horário de saída). |
-| RF-09 | No horário de saída dispara o lembrete "HORA DE SAIR", no estilo escolhido (RF-10), listando os itens. |
-| RF-10 | Estilos: `PADRAO` (notificação com ação "Já Saí"); `ALARME` (tela cheia, botão único); `INSISTENTE` (tela cheia, segurar 3 s); `DESAFIO` (tela cheia, digitar "JÁ FIZ"). |
-| RF-11 | Confirmar a saída marca `confirmouSaida = true`. |
-| RF-12 | 10 min após o horário de saída, se a saída não foi confirmada, é exibida a notificação "Você está atrasado!". |
-| RF-13 | Ao entrar num raio de 200 m do destino, o app marca `confirmouChegada` e notifica "Você chegou!". |
-| RF-14 | Compromissos com "Excluir após concluir" são apagados quando já passaram (limpeza ao abrir a tela). |
-| RF-15 | O usuário escolhe dias de repetição (armazenados em `diasRepeticao`). |
-| RF-16 | A lista mostra os compromissos em ordem cronológica, com detalhes expansíveis e atalho para abrir a rota no Google Maps. |
-
-**Pomodoro**
-
-| ID | Requisito |
-|---|---|
-| RF-20 | Timer manual com Iniciar/Pausar/Retomar/Resetar, rodando em Foreground Service com notificação persistente e ações. |
-| RF-21 | Durações configuráveis: foco (25), pausa curta (5), pausa longa (15), ciclos até pausa longa (4), meta diária (8). |
-| RF-22 | Transições FOCO → PAUSA_CURTA/PAUSA_LONGA → FOCO; som ao trocar de fase; notificação de transição quando o app está em background. |
-| RF-23 | A sessão termina quando atinge a meta de ciclos; mostra diálogo de parabéns (foreground) ou notificação (background). |
-| RF-24 | Cada foco concluído é gravado em `sessoes_pomodoro_concluidas`; a tela mostra o progresso do dia vs. meta. |
-| RF-25 | Automações (premium): título, meta de ciclos, gatilho por horário, gatilho por local (Places ou localização atual), repetição por dia da semana. |
-| RF-26 | Quando as condições da automação são satisfeitas, o app mostra a notificação "Hora de Focar!" com ações Iniciar/Ignorar. |
-| RF-27 | Automações sem repetição são arquivadas no histórico após disparar; o histórico permite reativar, excluir ou limpar tudo. |
-
-**Sistema**
-
-| ID | Requisito |
-|---|---|
-| RF-30 | Tela de diagnóstico de permissões (notificações, localização, alarmes exatos, sobreposição) com atalhos para ativar, e dicas para Xiaomi/Samsung. |
-| RF-31 | Na primeira execução, pede permissão de notificação, localização (incl. background) e exclusão de otimização de bateria. |
-| RF-32 | Frase motivacional do dia ("Agora vai...") que muda uma vez por dia. |
-
-### 2.2 Requisitos não funcionais
-
-| ID | Requisito |
-|---|---|
-| RNF-01 | Android 8.0+ (`minSdk 26`), `targetSdk/compileSdk 34`. |
-| RNF-02 | Lembretes devem disparar com o app fechado e em Doze (`setExactAndAllowWhileIdle` + `RTC_WAKEUP`). |
-| RNF-03 | Dados ficam somente no dispositivo; `allowBackup=false`. |
-| RNF-04 | A chave do Google Maps não é versionada: vem de `local.properties` (`MAPS_API_KEY`) via `BuildConfig` e `manifestPlaceholders`. |
-| RNF-05 | Interface em português (pt-BR), Material 3, tema claro/escuro, layout retrato e paisagem no Pomodoro. |
-| RNF-06 | Telas de alarme devem acender a tela e aparecer sobre o bloqueio (`showWhenLocked`, `turnScreenOn`, full-screen intent). |
+| Spec | Prefixo | Escopo |
+|---|---|---|
+| [`capabilities/compromissos.md`](capabilities/compromissos.md) | `COMP` | Cadastro, rota, etapas, itens, lista |
+| [`capabilities/lembretes.md`](capabilities/lembretes.md) | `LEMB` | Alarmes de etapa, saída, atraso, chegada |
+| [`capabilities/pomodoro.md`](capabilities/pomodoro.md) | `POMO` | Timer, fases, conclusão, progresso |
+| [`capabilities/automacoes.md`](capabilities/automacoes.md) | `AUTO` | Automações por horário/local, histórico |
+| [`capabilities/sistema.md`](capabilities/sistema.md) | `SIS` | Navegação, permissões, configurações, privacidade |
 
 ---
 
@@ -331,14 +287,14 @@ que as desliga em ordem de prioridade. Deep link simples via extra
 
 ## 9. Dívida técnica e riscos conhecidos
 
-Itens encontrados na leitura do código. São candidatos naturais a tarefas RPI.
+Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠️/⬜ nas specs ou a um princípio da constituição.
 
 | # | Severidade | Problema | Onde |
 |---|---|---|---|
-| DT-01 | **Alta** | `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (RF-13) nunca funciona**. | `MainActivity.onCreate`, `CompromissoGeofenceManager` |
+| DT-01 | **Alta** | `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. | `MainActivity.onCreate`, `CompromissoGeofenceManager` |
 | DT-02 | **Alta** | Chaves de extra divergentes: o ViewModel grava `"EXTRA_TITLE"`, `"EXTRA_MESSAGE"`, `"EXTRA_NOTIFICATION_ID"`, `"EXTRA_HAS_ACTION"`, `"EXTRA_ACTION_INTENT"`, `"EXTRA_ACTION_TITLE"`, mas o `AlarmReceiver` lê as constantes `"extra_title"`, `"extra_message"`… Resultado: o lembrete de saída sai com título/mensagem padrão, ID aleatório e **sem o botão "Já Saí"**. | `CompromissoViewModel.agendarAlarmeSaidaComAction`, `AlarmReceiver` |
 | DT-03 | **Alta** | `fallbackToDestructiveMigration` + `exportSchema=false`: qualquer mudança de schema **apaga todos os dados do usuário**. Os schemas em `app/schemas` (v3, v4) estão desatualizados (DB está na v10). | `AppDatabase` |
-| DT-04 | Alta | Repetição de compromissos (RF-15) é só armazenada: os alarmes são únicos e não são reagendados para a próxima ocorrência. | `CompromissoViewModel.agendarAlarmes` |
+| DT-04 | Alta | Repetição de compromissos (COMP-13) é só armazenada: os alarmes são únicos e não são reagendados para a próxima ocorrência. | `CompromissoViewModel.agendarAlarmes` |
 | DT-05 | Alta | Não existe receiver de `BOOT_COMPLETED`/`TIME_SET`: alarmes e geofences somem após reiniciar o aparelho. | `AndroidManifest.xml` |
 | DT-06 | Média | Cancelamento do alarme de atraso usa um `Intent` sem `action`, que não casa com o `PendingIntent` original — o alarme CHECK_LATE não é cancelado ao excluir/desativar (mitigado porque ele checa `confirmouSaida`, mas dispara para compromissos excluídos se o ID for reaproveitado). `CONFIRM_EXIT` tenta cancelar o ID `*100+98`, que nunca foi agendado. | `cancelarTodosAlarmes`, `NotificationActionReceiver` |
 | DT-07 | Média | `PomodoroScheduler.cancelAll` chama `WorkManager.cancelAllWork()`, cancelando **qualquer** trabalho do app, não só automações. | `PomodoroScheduler` |
@@ -350,6 +306,9 @@ Itens encontrados na leitura do código. São candidatos naturais a tarefas RPI.
 | DT-13 | Baixa | `app/release/app-release.aab` está versionado (`.gitignore` tem `/buildapp-release.aab`, typo). `libs.versions.toml` existe mas quase não é usado; `lifecycle-runtime-compose` declarado duas vezes; `minifyEnabled=false` no release. | build |
 | DT-14 | Baixa | Sem testes automatizados; lógica de negócio (cálculo de horários, máquina de estados) acoplada a Android, difícil de testar. | geral |
 | DT-15 | Baixa | `TimePickerDialog` duplicado (`MainActivity.kt` e `AddCompromissoScreen.kt`); arquivos com várias declarações numa linha só. | UI |
+| DT-16 | Média | Ao confirmar a saída na `ReminderActivity`, o broadcast `CONFIRM_EXIT` vai sem `EXTRA_NOTIFICATION_ID` e a notificação de tela cheia (`ongoing`) continua na bandeja (LEMB-07). | `ReminderActivity.confirmarSaida`, `AlarmReceiver` |
+| DT-17 | Média | Sem permissão de alarme exato (Android 12+), `NotificationScheduler.scheduleAlarm` só registra no log, enquanto os helpers do ViewModel chamam `setExactAndAllowWhileIdle` no `else` e lançam `SecurityException`, que vira "Erro ao salvar." com o compromisso já gravado (LEMB-10). | `NotificationScheduler`, `CompromissoViewModel` |
+| DT-18 | Média | `PomodoroService.onStartCommand` recalcula a meta a cada comando: PAUSE/START sem `EXTRA_CYCLES` trocam a meta da automação pela meta diária (POMO-05). | `PomodoroService` |
 
 ---
 
@@ -364,16 +323,16 @@ Itens encontrados na leitura do código. São candidatos naturais a tarefas RPI.
 | ADR-05 | Navegação por flags no Compose | Rapidez de implementação | Sem back stack real nem deep links robustos |
 | ADR-06 | Automação Pomodoro sugere (notificação) em vez de iniciar sozinha | Evitar iniciar foco sem o usuário querer | Exige interação |
 
-Novas decisões devem ser registradas aqui (ou em `docs/adr/`) a partir da fase
-**Plan** do RPI.
+Novas decisões são registradas aqui a partir da fase **Plan** (constituição P8).
 
 ---
 
-## 11. Rastreabilidade e manutenção deste documento
+## 11. Manutenção deste documento
 
-- Toda tarefa RPI cita os IDs afetados (`RF-xx`, `RNF-xx`, `DT-xx`).
-- Ao concluir a fase **Implement**, atualize as seções afetadas e o histórico abaixo.
+- É atualizado na fase **Implement** de cada mudança que altere componentes, dados, IDs ou decisões.
+- Ao resolver um DT, marque-o como ~~riscado~~ com o link da mudança em `specs/changes/` e atualize o status do requisito na spec viva.
 
 | Versão | Data | Mudança |
 |---|---|---|
 | 1.0 | 2026-10-25 | Versão inicial, engenharia reversa do código (app 1.5). |
+| 1.1 | 2026-10-26 | Requisitos movidos para `specs/capabilities/` (Spec-Driven Development); DT-16 a DT-18 adicionados. |

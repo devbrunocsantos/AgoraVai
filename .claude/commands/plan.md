@@ -1,16 +1,17 @@
 ---
-description: RPI fase 2 — transforma um research.md aprovado em plan.md (sem mudar código)
+description: RPI fase 2 (Plan) — transforma spec + research em plano verificável (sem mudar código)
 argument-hint: <caminho do research.md>
 ---
 
-Você está na fase **Plan** do fluxo RPI deste projeto. Leia `docs/rpi/README.md`, `docs/SDD.md` e o research indicado: $ARGUMENTS
+Você está na fase **Plan**. Leia `specs/README.md`, `specs/constitution.md`, `specs/architecture.md`, o research ($ARGUMENTS) e o `spec.md` da mesma pasta.
 
 Regras:
-- NÃO altere código. O único arquivo que você cria é `plan.md`, na mesma pasta do research.
-- Baseie-se no research; se ele estiver incompleto ou errado, aponte o problema em vez de adivinhar.
-- Use o template `docs/rpi/templates/plan.md`.
-- Cada fase deve ser pequena e ter verificação concreta (`./gradlew assembleDebug`, `./gradlew test`, roteiro manual).
-- Se houver mudança de schema do Room, planeje uma `Migration` explícita — não conte com `fallbackToDestructiveMigration` (SDD DT-03).
-- Liste as seções do SDD que precisarão ser atualizadas.
+- NÃO altere código nem specs vivas. O único arquivo que você cria é `plan.md`, na mesma pasta.
+- Use `specs/templates/plan.md`.
+- Preencha a matriz de verificação: **todo** critério de aceite do delta tem um teste (que citará o ID do critério) ou um roteiro manual concreto.
+- Preencha o checklist da constituição. Toda exceção precisa de justificativa.
+- Fases pequenas, cada uma com os critérios que cobre e uma verificação concreta (`./gradlew assembleDebug`, `./gradlew test`, roteiro).
+- Mudança de schema do Room exige `Migration` explícita e schema exportado (P3).
+- Se o research estiver incompleto ou contradisser a spec, aponte o problema em vez de adivinhar.
 
-Termine apresentando o plano resumido e peça aprovação explícita antes do `/implement`. Deixe o status do plano como "Rascunho".
+Deixe o status como "Rascunho". Termine com o plano resumido e peça aprovação explícita antes do `/implement`.

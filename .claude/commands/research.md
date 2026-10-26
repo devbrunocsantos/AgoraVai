@@ -1,19 +1,16 @@
 ---
-description: RPI fase 1 — pesquisa o código e gera research.md (somente fatos, sem mudar código)
-argument-hint: <descrição da tarefa>
+description: RPI fase 1 (Research) — mapeia o código ligado a uma spec aprovada (somente fatos)
+argument-hint: <caminho do spec.md>
 ---
 
-Você está na fase **Research** do fluxo RPI deste projeto. Leia `docs/rpi/README.md` e `docs/SDD.md` antes de começar.
+Você está na fase **Research**. Leia `specs/README.md`, `specs/architecture.md`, a spec da mudança ($ARGUMENTS) e as specs vivas que ela afeta.
 
-Tarefa: $ARGUMENTS
+Se a spec não estiver com status "Aprovada", pare e peça aprovação.
 
 Regras:
-- NÃO altere nenhum arquivo de código. O único arquivo que você cria é o research.md.
-- Registre apenas fatos sobre o código atual, sempre com referências `caminho:linha`. Não proponha solução.
-- Identifique os IDs do SDD envolvidos (RF-xx, RNF-xx, DT-xx).
-- Dê atenção especial aos contratos frágeis: chaves de extras de Intent, request codes de PendingIntent, IDs de notificação, schema do Room e chaves de SharedPreferences.
+- NÃO altere código nem specs. O único arquivo que você cria é `research.md`, na mesma pasta da spec.
+- Registre só fatos sobre o código atual, sempre com `caminho:linha`. Não proponha solução.
+- Para cada requisito do delta e cada requisito vizinho afetado, confira se o status na spec viva (✅/⚠️/⬜) bate com o código. Divergências são achados importantes.
+- Dê atenção especial aos contratos da constituição P6: extras de Intent, request codes, IDs de notificação e geofence, schema do Room, SharedPreferences.
 
-Passos:
-1. Crie a pasta `docs/rpi/tasks/<AAAA-MM-DD>-<slug-curto>/`.
-2. Copie `docs/rpi/templates/research.md` para ela como `research.md` e preencha todas as seções.
-3. Termine com um resumo de 3–5 linhas e as perguntas em aberto, pedindo revisão antes do `/plan`.
+Use `specs/templates/research.md`. Termine com um resumo de 3 a 5 linhas e as perguntas em aberto, e peça revisão antes do `/plan`.
