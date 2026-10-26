@@ -8,7 +8,8 @@ import androidx.core.app.NotificationCompat
 import com.brunocsantos.agoravai.R
 import com.brunocsantos.agoravai.data.AppDatabase
 import com.brunocsantos.agoravai.notifications.CHANNEL_ID
-import com.brunocsantos.agoravai.notifications.NotificationScheduler
+import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
+import com.brunocsantos.agoravai.notifications.EXTRA_ACTION_NOTIFICATION_ID
 import com.brunocsantos.agoravai.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notificationId = intent.getIntExtra("EXTRA_NOTIFICATION_ID", 0)
+        val notificationId = intent.getIntExtra(EXTRA_ACTION_NOTIFICATION_ID, 0)
 
         // ID do compromisso (usado para as novas ações)
         val compromissoId = intent.getLongExtra("EXTRA_COMPROMISSO_ID", -1L)
@@ -46,8 +47,8 @@ class NotificationActionReceiver : BroadcastReceiver() {
                         val dao = AppDatabase.getDatabase(context).appDao()
                         dao.confirmarSaida(compromissoId)
 
-                        // Cancela o alarme de verificação de atraso (ID fixo: ID*100 + 98)
-                        NotificationScheduler.cancelAlarm(context, (compromissoId * 100 + 98).toInt())
+                        // Cancela o alarme de verificação de atraso (LEMB-07)
+                        CompromissoAlarmScheduler.cancelarVerificacaoAtraso(context, compromissoId)
                     }
                     // Fecha a notificação de "Hora de Sair"
                     if (notificationId != 0) notificationManager.cancel(notificationId)

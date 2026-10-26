@@ -20,6 +20,8 @@ const val EXTRA_ACTION_TITLE = "extra_action_title"
 const val EXTRA_NOTIFICATION_TYPE = "extra_notification_type"
 const val EXTRA_ITEMS = "EXTRA_ITEMS" // Novo: Lista de strings
 const val EXTRA_COMPROMISSO_ID = "EXTRA_COMPROMISSO_ID" // Novo: ID para confirmação
+// ID da notificação a fechar, lido pelo NotificationActionReceiver (valor mantido por compatibilidade)
+const val EXTRA_ACTION_NOTIFICATION_ID = "EXTRA_NOTIFICATION_ID"
 
 private const val TAG = "AgoraVai-Debug"
 

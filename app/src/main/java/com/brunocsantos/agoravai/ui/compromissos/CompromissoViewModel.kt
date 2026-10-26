@@ -2,10 +2,7 @@ package com.brunocsantos.agoravai.ui.compromissos
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Build
@@ -20,10 +17,8 @@ import com.brunocsantos.agoravai.data.Etapa
 import com.brunocsantos.agoravai.data.ItemLembrete
 import com.brunocsantos.agoravai.data.NotificationType
 import com.brunocsantos.agoravai.network.RetrofitInstance
-import com.brunocsantos.agoravai.notifications.EXTRA_NOTIFICATION_TYPE
-import com.brunocsantos.agoravai.notifications.NotificationScheduler
+import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
 import com.brunocsantos.agoravai.notifications.calcularHorarios
-import com.brunocsantos.agoravai.services.NotificationActionReceiver
 import com.brunocsantos.agoravai.services.geofence.CompromissoGeofenceManager
 import com.brunocsantos.agoravai.utils.SettingsManager
 import com.google.android.gms.location.LocationServices
@@ -201,7 +196,7 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
                         dao.excluirEtapasPorCompromissoId(currentState.id)
                         dao.excluirItensPorCompromissoId(currentState.id)
                         CompromissoGeofenceManager.removeGeofence(currentState.id)
-                        cancelarTodosAlarmes(context, currentState.id.toInt(), 10)
+                        CompromissoAlarmScheduler.cancelar(context, currentState.id, 10)
                         currentState.id
                     }
 
@@ -212,7 +207,7 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
 
                     val finalCompromisso = compromissoParaSalvar.copy(id = compromissoId)
                     CompromissoGeofenceManager.addGeofenceChegada(finalCompromisso)
-                    agendarAlarmes(context, finalCompromisso, etapasParaSalvar, validatedItens)
+                    CompromissoAlarmScheduler.agendar(context, finalCompromisso, etapasParaSalvar, validatedItens.map { it.nome })
                     onSuccess()
                 } else { _addCompromissoUiState.update { it.copy(saveError = "Rota não encontrada.") } }
             } catch (e: Exception) { _addCompromissoUiState.update { it.copy(saveError = "Erro ao salvar.") } }
@@ -223,95 +218,17 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
         viewModelScope.launch {
             val updated = c.compromisso.copy(isEnabled = isEnabled)
             dao.updateCompromisso(updated)
-            val itensState = c.itensLembrete.map { ItemLembreteState(id = it.id, nome = it.nomeItem) }
-            if (isEnabled) { agendarAlarmes(applicationContext, updated, c.etapas, itensState); CompromissoGeofenceManager.addGeofenceChegada(updated) }
-            else { cancelarTodosAlarmes(applicationContext, updated.id.toInt(), c.etapas.size); CompromissoGeofenceManager.removeGeofence(updated.id) }
+            if (isEnabled) { CompromissoAlarmScheduler.agendar(applicationContext, updated, c.etapas, c.itensLembrete.map { it.nomeItem }); CompromissoGeofenceManager.addGeofenceChegada(updated) }
+            else { CompromissoAlarmScheduler.cancelar(applicationContext, updated.id, c.etapas.size); CompromissoGeofenceManager.removeGeofence(updated.id) }
         }
     }
 
     fun excluirCompromisso(context: Context, c: CompromissoComEtapas) {
         viewModelScope.launch {
             dao.excluirCompromisso(c.compromisso)
-            cancelarTodosAlarmes(context, c.compromisso.id.toInt(), c.etapas.size)
+            CompromissoAlarmScheduler.cancelar(context, c.compromisso.id, c.etapas.size)
             CompromissoGeofenceManager.removeGeofence(c.compromisso.id)
         }
-    }
-
-    private fun agendarAlarmes(context: Context, compromisso: Compromisso, etapas: List<Etapa>, itens: List<ItemLembreteState>) {
-        if (!compromisso.isEnabled) return
-        val id = compromisso.id.toInt()
-        val calendar = Calendar.getInstance().apply { timeInMillis = compromisso.dataHoraEvento }
-        val tempoTotal = compromisso.tempoDeslocamentoMinutos + compromisso.tempoDeSegurancaMinutos
-        val horarioSaida = (calendar.clone() as Calendar).apply { add(Calendar.MINUTE, -tempoTotal) }
-        var proximoHorario = horarioSaida.clone() as Calendar
-
-        etapas.reversed().forEachIndexed { index, etapa ->
-            proximoHorario.add(Calendar.MINUTE, -etapa.duracaoMinutos)
-            NotificationScheduler.scheduleAlarm(context, proximoHorario.timeInMillis, (id * 100) + index, "Próximo Preparativo: ${etapa.descricao}", "Faltam ${etapa.duracaoMinutos} min.")
-        }
-
-        // 1. Converte lista de itens para ArrayList<String> para passar na Intent
-        val itemsList = ArrayList(itens.map { it.nome })
-
-        val msgFinal = if (itemsList.isNotEmpty()) "Saia agora! Não esqueça seus itens." else "Saia agora para chegar a tempo!"
-
-        val confirmIntent = Intent(context, NotificationActionReceiver::class.java).apply {
-            action = NotificationActionReceiver.Actions.CONFIRM_EXIT.toString()
-            putExtra("EXTRA_COMPROMISSO_ID", compromisso.id)
-            putExtra("EXTRA_NOTIFICATION_ID", (id * 100) + 99)
-        }
-        val confirmPending = PendingIntent.getBroadcast(context, id, confirmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-
-        // 2. Passa a lista e o tipo para o helper
-        agendarAlarmeSaidaComAction(
-            context = context,
-            time = horarioSaida.timeInMillis,
-            id = (id * 100) + 99,
-            title = "HORA DE SAIR: ${compromisso.titulo}",
-            msg = msgFinal,
-            actionIntent = confirmPending,
-            type = compromisso.notificationType,
-            items = itemsList // <-- Passando a lista aqui
-        )
-
-        // Alarme de Verificação de Atraso (10 min depois - Backup)
-        val checkIntent = Intent(context, NotificationActionReceiver::class.java).apply { action = NotificationActionReceiver.Actions.CHECK_LATE.toString(); putExtra("EXTRA_COMPROMISSO_ID", compromisso.id) }
-        val checkPending = PendingIntent.getBroadcast(context, id + 9999, checkIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val timeCheck = (horarioSaida.clone() as Calendar).apply { add(Calendar.MINUTE, 10) }.timeInMillis
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && am.canScheduleExactAlarms()) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeCheck, checkPending) else am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeCheck, checkPending)
-    }
-
-    private fun agendarAlarmeSaidaComAction(
-        context: Context,
-        time: Long,
-        id: Int,
-        title: String,
-        msg: String,
-        actionIntent: PendingIntent,
-        type: NotificationType,
-        items: ArrayList<String> = arrayListOf() // Novo parâmetro
-    ) {
-        val intent = Intent(context, com.brunocsantos.agoravai.notifications.AlarmReceiver::class.java).apply {
-            putExtra("EXTRA_TITLE", title)
-            putExtra("EXTRA_MESSAGE", msg)
-            putExtra("EXTRA_NOTIFICATION_ID", id)
-            putExtra("EXTRA_HAS_ACTION", true)
-            putExtra("EXTRA_ACTION_INTENT", actionIntent)
-            putExtra("EXTRA_ACTION_TITLE", "Já Saí")
-            putExtra(EXTRA_NOTIFICATION_TYPE, type.ordinal)
-            putStringArrayListExtra("EXTRA_ITEMS", items) // <-- Anexando a lista
-            putExtra("EXTRA_COMPROMISSO_ID", (id / 100).toLong()) // Passa ID do compromisso para a Activity confirmar
-        }
-        val pending = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && am.canScheduleExactAlarms()) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pending) else am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pending)
-    }
-
-    private fun cancelarTodosAlarmes(context: Context, id: Int, numEtapas: Int) {
-        for (i in 0 until (numEtapas + 5)) NotificationScheduler.cancelAlarm(context, (id * 100) + i)
-        NotificationScheduler.cancelAlarm(context, (id * 100) + 99)
-        val checkIntent = Intent(context, NotificationActionReceiver::class.java); val p = PendingIntent.getBroadcast(context, id + 9999, checkIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT); (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).cancel(p)
     }
 
     @SuppressLint("MissingPermission")
