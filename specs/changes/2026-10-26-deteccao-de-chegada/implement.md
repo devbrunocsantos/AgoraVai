@@ -10,17 +10,24 @@
 |---|---|---|---|
 | 1 — Application | ✅ feito | ver `git log` ("chegada fase 1") | build ✅ · testes ✅ · `AgoraVaiApplication` presente no manifest mesclado ✅ · `dumpsys location` ⏳ (aparelho) |
 | 2 — Regra do período | ✅ feito | ver `git log` ("chegada fase 2") | build ✅ · testes 9/9 ✅ |
-| 3 — Registro e receiver | ⬜ pendente | | |
+| 3 — Registro e receiver | ✅ feito | ver `git log` ("chegada fase 3") | build ✅ · testes 9/9 ✅ · manual R1–R4 ⏳ (aparelho) |
 | 4 — Coordenadas não vazam (DT-20) | ⬜ pendente | | |
 
 ## Desvios do plano
 - **Aprovação:** a Fase 4 (DT-20, critério COMP-08.a) foi acrescentada ao plano na aprovação, conforme proposto ao fim da mudança `lembrete-de-saida`.
+- **Fase 3:** além de cancelar os alarmes pendentes, a chegada fecha a notificação "HORA DE SAIR" se ela já estiver na bandeja. A chegada grava `confirmouSaida`, e LEMB-07 diz que confirmar a saída fecha o lembrete. Sem isso, o alarme de tela cheia (que só sai ao confirmar) ficaria preso na bandeja de quem já chegou.
+- **Fase 3:** `addGeofenceChegada` também deixa de registrar geofence para compromisso desativado (proteção; os chamadores já não faziam isso).
 
 ## Critérios de aceite
 
 | Critério | Resultado | Evidência |
 |---|---|---|
 | LEMB-09.a / .c (regra do período) | ✅ | `JanelaChegadaTest` (dentro, antes do preparo, dia anterior, limites 8:30 e 12:00/12:01) |
+| LEMB-09.a | ⏳ código pronto, falta roteiro R1 | `handleCompromissoChegada` grava a chegada e notifica dentro do período |
+| LEMB-09.b | ⏳ código pronto, falta roteiro R1 | `confirmarSaida` + `CompromissoAlarmScheduler.cancelar` na chegada |
+| LEMB-09.c | ⏳ código pronto, falta roteiro R2 | Fora do período retorna sem remover a geofence |
+| LEMB-09.d | ⏳ código pronto, falta roteiro R3 | `goAsync()` + managers inicializados no `AgoraVaiApplication` |
+| LEMB-09.e | ⏳ código inalterado, falta roteiro R4 | `addGeofenceChegada` continua ignorando coordenadas `0.0` |
 
 ## Saída das verificações
 ```

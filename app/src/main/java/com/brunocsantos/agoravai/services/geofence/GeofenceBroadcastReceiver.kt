@@ -11,6 +11,9 @@ import androidx.work.WorkManager
 import com.brunocsantos.agoravai.R
 import com.brunocsantos.agoravai.data.AppDatabase
 import com.brunocsantos.agoravai.notifications.CHANNEL_ID
+import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
+import com.brunocsantos.agoravai.notifications.calcularHorarios
+import com.brunocsantos.agoravai.notifications.estaNaJanelaDeChegada
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import kotlinx.coroutines.CoroutineScope
@@ -53,21 +56,41 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val dao = AppDatabase.getDatabase(context).appDao()
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Usamos GlobalScope ou um Scope manual pois o Receiver morre rápido.
-        // GoAsync() é outra opção, mas aqui o processamento é rápido.
+        // goAsync mantém o receiver vivo até o acesso ao banco terminar (LEMB-09.d)
+        val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            val compromisso = dao.getCompromissoById(compromissoId)
+            try {
+                val dados = dao.getCompromissoComEtapasById(compromissoId) ?: return@launch
+                val compromisso = dados.compromisso
 
-            // Só processa se o compromisso existe e ainda não foi confirmado
-            if (compromisso != null && !compromisso.confirmouChegada) {
+                // Só processa se o compromisso está ativo e a chegada ainda não foi confirmada
+                if (!compromisso.isEnabled || compromisso.confirmouChegada) return@launch
+
+                val horarios = calcularHorarios(
+                    compromisso.dataHoraEvento,
+                    compromisso.tempoDeslocamentoMinutos,
+                    compromisso.tempoDeSegurancaMinutos,
+                    dados.etapas.map { it.duracaoMinutos }
+                )
+                if (!estaNaJanelaDeChegada(System.currentTimeMillis(), horarios, compromisso.dataHoraEvento)) {
+                    // Fora do período: ignora e continua monitorando para a chegada de verdade (LEMB-09.c)
+                    Log.d("AgoraVai-Geofence", "Entrada fora do período de chegada: ${compromisso.titulo}")
+                    return@launch
+                }
+
                 Log.d("AgoraVai-Geofence", "Chegada detectada para: ${compromisso.titulo}")
 
-                // 1. Atualiza DB
+                // 1. Quem chegou também saiu: grava as duas confirmações
+                dao.confirmarSaida(compromissoId)
                 dao.confirmarChegada(compromissoId)
 
-                // 2. Mostra Notificação de Sucesso
+                // 2. Cancela etapas, saída e atraso que ainda não dispararam, e fecha o lembrete de saída se estiver aberto (LEMB-09.b)
+                CompromissoAlarmScheduler.cancelar(context, compromissoId, dados.etapas.size)
+                notificationManager.cancel(CompromissoAlarmScheduler.idAlarmeSaida(compromissoId))
+
+                // 3. Mostra Notificação de Sucesso
                 val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground) // Certifique-se de ter este ícone ou use outro
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle("Você chegou! \uD83C\uDFC1")
                     .setContentText("Destino alcançado: ${compromisso.titulo}")
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -76,8 +99,10 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
                 notificationManager.notify((compromissoId * 100 + 999).toInt(), notification)
 
-                // 3. Remove o Geofence (Limpeza)
+                // 4. Remove o Geofence (Limpeza)
                 CompromissoGeofenceManager.removeGeofence(compromissoId)
+            } finally {
+                pendingResult.finish()
             }
         }
     }

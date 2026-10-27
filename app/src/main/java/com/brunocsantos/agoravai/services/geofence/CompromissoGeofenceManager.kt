@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.brunocsantos.agoravai.data.Compromisso
+import com.brunocsantos.agoravai.data.Etapa
+import com.brunocsantos.agoravai.notifications.fimDaJanelaDeChegada
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
@@ -32,12 +34,20 @@ object CompromissoGeofenceManager {
         applicationContext = context.applicationContext
     }
 
-    fun addGeofenceChegada(compromisso: Compromisso) {
+    fun addGeofenceChegada(compromisso: Compromisso, etapas: List<Etapa>) {
         if (!::applicationContext.isInitialized) return
+        if (!compromisso.isEnabled) return
 
         // Verifica se temos coordenadas válidas
         if (compromisso.latitudeDestino == 0.0 || compromisso.longitudeDestino == 0.0) {
             Log.e("CompromissoGeofence", "Coordenadas inválidas para compromisso ${compromisso.id}")
+            return
+        }
+
+        // LEMB-09: o monitoramento termina sozinho no fim do período de chegada
+        val duracaoMonitoramento = fimDaJanelaDeChegada(compromisso.dataHoraEvento) - System.currentTimeMillis()
+        if (duracaoMonitoramento <= 0) {
+            Log.d("CompromissoGeofence", "Período de chegada já terminou para compromisso ${compromisso.id}")
             return
         }
 
@@ -48,7 +58,7 @@ object CompromissoGeofenceManager {
                 compromisso.longitudeDestino,
                 GEOFENCE_RADIUS_IN_METERS
             )
-            .setExpirationDuration(Geofence.NEVER_EXPIRE) // Fica ativo até ser removido manualmente ou o app reiniciar
+            .setExpirationDuration(duracaoMonitoramento)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER) // Só queremos saber quando ENTRA
             .build()
 

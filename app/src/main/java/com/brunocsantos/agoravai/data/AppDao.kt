@@ -25,6 +25,10 @@ interface AppDao {
     suspend fun getCompromissoById(id: Long): Compromisso?
 
     @Transaction
+    @Query("SELECT * FROM compromissos WHERE id = :id")
+    suspend fun getCompromissoComEtapasById(id: Long): CompromissoComEtapas?
+
+    @Transaction
     @Query("SELECT * FROM compromissos ORDER BY dataHoraEvento ASC")
     fun getAllCompromissosComEtapas(): Flow<List<CompromissoComEtapas>>
 
