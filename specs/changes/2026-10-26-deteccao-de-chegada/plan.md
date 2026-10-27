@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Spec:** [`spec.md`](spec.md) · **Research:** [`research.md`](research.md)
-- **Status:** Rascunho
+- **Status:** Aprovado em 2026-10-27 por Bruno C. Santos (com a Fase 4, DT-20, acrescentada na aprovação)
 - **Pré-requisito:** `2026-10-26-lembrete-de-saida` implementada (`CompromissoAlarmScheduler`, `calcularHorarios`)
 
 ## 1. Objetivo
@@ -19,6 +19,7 @@ compromisso.
 | LEMB-09.c | Manual | R2: compromisso amanhã; mock no destino hoje → nada; `dumpsys location` ainda lista a geofence |
 | LEMB-09.d | Manual | R3: `adb shell am kill com.brunocsantos.agoravai` e repetir R1 |
 | LEMB-09.e | Manual | R4: destino que o Geocoder não resolve; salvar funciona e não há geofence |
+| COMP-08.a | Manual | R5: salvar A (endereço comum) e depois B (endereço que o Geocoder não resolve); `dumpsys location` não lista geofence para B |
 
 ## 3. Abordagem
 1. **`AgoraVaiApplication`** (novo) inicializa `GeofenceManager` e `CompromissoGeofenceManager`, que passam a funcionar em qualquer processo (receivers, workers). Essas inicializações saem da `MainActivity`. Isso também corrige o `GeofenceManager.remove` no `PomodoroWorker`.
@@ -36,7 +37,7 @@ compromisso.
 
 | Princípio | Atende? | Nota |
 |---|---|---|
-| P1 Spec primeiro | ☐ | aguarda aprovação |
+| P1 Spec primeiro | ✅ | spec aprovada em 2026-10-27 |
 | P2 Lembrete não falha em silêncio | ✅ | chegada detectada também em segundo plano |
 | P3 Dados preservados | ✅ | só uma consulta nova, sem schema |
 | P4 Local-first | ✅ | localização só no aparelho |
@@ -61,6 +62,12 @@ compromisso.
 - **Critérios cobertos:** LEMB-09.a–e
 - **Arquivos:** `services/geofence/CompromissoGeofenceManager.kt`, `GeofenceBroadcastReceiver.kt`, `data/AppDao.kt`, `CompromissoViewModel.kt` (passar as etapas)
 - **Verificação:** build + R1–R4
+
+### Fase 4 — Coordenadas não vazam entre salvamentos (DT-20)
+- **Critérios cobertos:** COMP-08.a
+- **Arquivos:** `ui/compromissos/CompromissoViewModel.kt`
+- **Mudanças:** `tempLatDestino`/`tempLngDestino` deixam de ser campos do ViewModel e viram variáveis locais de cada salvamento, começando em `0.0`.
+- **Verificação:** build + R5
 
 ## 6. Impacto
 - **Room:** só uma consulta nova (`@Transaction`), sem mudança de versão.

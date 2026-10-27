@@ -42,7 +42,6 @@ import com.brunocsantos.agoravai.data.AppDatabase
 import com.brunocsantos.agoravai.notifications.NotificationScheduler
 import com.brunocsantos.agoravai.services.AppForegroundState
 import com.brunocsantos.agoravai.services.PomodoroTimerState
-import com.brunocsantos.agoravai.services.geofence.GeofenceManager
 import com.brunocsantos.agoravai.ui.ViewModelFactory
 import com.brunocsantos.agoravai.ui.compromissos.AddCompromissoScreen
 import com.brunocsantos.agoravai.ui.compromissos.CompromissosScreen
@@ -119,7 +118,6 @@ class MainActivity : ComponentActivity() {
         billingClientManager = BillingClientManager(this)
         initializePlacesApi()
         NotificationScheduler.createNotificationChannel(this)
-        GeofenceManager.initialize(this)
         SettingsManager.initialize(this)
         PomodoroTimerState.resetToDefaults(this)
         askNotificationPermission()

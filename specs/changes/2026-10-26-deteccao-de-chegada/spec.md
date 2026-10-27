@@ -2,9 +2,9 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Rascunho
+- **Status:** Aprovada em 2026-10-27 por Bruno C. Santos
 - **Capacidades afetadas:** `capabilities/lembretes.md`
-- **DTs relacionados:** DT-01
+- **DTs relacionados:** DT-01, DT-20
 - **Depende de:** `2026-10-26-lembrete-de-saida` (usa o agendador para cancelar lembretes)
 
 ## 1. Problema
@@ -40,6 +40,11 @@ período, estar no local não conta.
   - **d.** Dado o app fechado (processo encerrado), quando entro no raio dentro do período, então a chegada é detectada da mesma forma.
   - **e.** Dado um destino sem coordenadas, quando salvo, então o compromisso é salvo normalmente, sem detecção de chegada (COMP-08).
 
+#### COMP-08 · Coordenadas do destino
+- **Antes / Depois:** texto sem mudança (DT-20: o código não cumpre o requisito quando o Geocoder falha).
+- **Critério de aceite novo:**
+  - **a.** Dado que salvei o compromisso A, com destino resolvido pelo Geocoder, quando salvo o compromisso B, cujo destino o Geocoder não resolve, então B fica sem coordenadas e sem detecção de chegada (e não herda as coordenadas de A).
+
 ## 4. Fora de escopo
 - Re-registrar a geofence depois de reiniciar o aparelho (mudança `reagendar-apos-reiniciar`).
 - Caso de borda: se o usuário já estiver dentro do raio quando o período começar e não sair dele, a chegada não é detectada (o Android só avisa na entrada). Fica para o futuro, com uso de "permanência" (`DWELL`).
@@ -48,5 +53,5 @@ período, estar no local não conta.
 **P2**: o lembrete é coerente com o que aconteceu, sem "Hora de sair" para quem já chegou. **P5**: celebra a chegada e evita ruído.
 
 ## 6. Perguntas em aberto
-- [ ] **Q3 —** o período "do início do preparo até 2 h depois do evento" está bom? (2 h cobre quem chega atrasado.)
-- [ ] **Q4 —** chegar deve mesmo cancelar os lembretes pendentes e marcar a saída? Recomendo que sim.
+- [x] **Q3 —** o período "do início do preparo até 2 h depois do evento" está bom? (2 h cobre quem chega atrasado.) **Decisão: aprovado.**
+- [x] **Q4 —** chegar deve mesmo cancelar os lembretes pendentes e marcar a saída? Recomendo que sim. **Decisão: sim.**
