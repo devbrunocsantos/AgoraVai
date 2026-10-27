@@ -63,10 +63,13 @@ SE o início do preparo for anterior ao momento atual, ENTÃO o sistema DEVE exi
 
 - **a.** Dado um evento às 10:00, 30 min de deslocamento, 15 de segurança e 20 de etapas, quando salvo às 9:00, então vejo "Impossível! Atraso de 5 min.". *(teste do cálculo: `HorariosLembreteTest`)*
 
-### COMP-08 · Coordenadas do destino — ✅
+### COMP-08 · Coordenadas do destino — 🧪
 QUANDO o usuário salva, o sistema DEVE tentar obter latitude/longitude do destino
 pelo Geocoder. A falha NÃO DEVE impedir o salvamento: as coordenadas ficam
 `0.0` e a detecção de chegada (LEMB-09) é desativada para o compromisso.
+
+- **a.** Dado que salvei o compromisso A, com destino resolvido pelo Geocoder, quando salvo o compromisso B, cujo destino o Geocoder não resolve, então B fica sem coordenadas e sem detecção de chegada (e não herda as coordenadas de A).
+- 🧪 Corrigido (DT-20) em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/); aguarda o roteiro manual R5.
 
 ### COMP-09 · Edição — ✅
 QUANDO o usuário toca em editar, o sistema DEVE abrir o formulário preenchido.

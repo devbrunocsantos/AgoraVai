@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Aprovada em 2026-10-27 por Bruno C. Santos
+- **Status:** Implementada em 2026-10-27 — aguardando roteiros manuais (R1–R5) para ser Concluída · Aprovada em 2026-10-27 por Bruno C. Santos
 - **Capacidades afetadas:** `capabilities/lembretes.md`
 - **DTs relacionados:** DT-01, DT-20
 - **Depende de:** `2026-10-26-lembrete-de-saida` (usa o agendador para cancelar lembretes)

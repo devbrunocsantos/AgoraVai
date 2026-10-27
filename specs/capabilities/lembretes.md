@@ -79,13 +79,25 @@ confirmada, ENTÃO o sistema DEVE notificar "Você está atrasado! 🏃" com
 
 - O aviso é verificado 10 min após a saída *(teste: `HorariosLembreteTest`)*.
 
-### LEMB-09 · Detecção de chegada — ⚠️ DT-01
+### LEMB-09 · Detecção de chegada — 🧪
 ONDE o destino tem coordenadas (COMP-08) e a permissão de localização em segundo
-plano foi concedida, QUANDO o usuário entrar num raio de 200 m do destino, o
-sistema DEVE gravar `confirmouChegada = true`, notificar "Você chegou! 🏁" com
-"Destino alcançado: <título>" e remover a geofence.
+plano foi concedida, QUANDO o usuário entrar num raio de 200 m do destino entre
+o início do preparo e 2 horas depois do horário do evento, o sistema DEVE:
+1. gravar `confirmouChegada = true` e `confirmouSaida = true`;
+2. cancelar os lembretes desse compromisso que ainda não dispararam (etapas, saída e atraso) e fechar o lembrete de saída, se estiver aberto;
+3. notificar "Você chegou! 🏁" com "Destino alcançado: <título>";
+4. parar de monitorar o destino.
 
-- Hoje: a geofence nunca é registrada porque `CompromissoGeofenceManager.initialize()` não é chamado.
+Entradas no raio fora desse período DEVEM ser ignoradas. O monitoramento DEVE
+terminar sozinho 2 horas depois do horário do evento.
+
+- **a.** Dado um compromisso às 10:00 com preparo começando às 8:30, quando entro no raio às 9:40, então recebo "Você chegou! 🏁" e o compromisso fica com chegada confirmada. *(regra do período: `JanelaChegadaTest`)*
+- **b.** Dado que cheguei às 9:10 e a saída era às 9:15, quando dá 9:15, então "HORA DE SAIR" não toca, e às 9:25 "Você está atrasado!" também não.
+- **c.** Dado o mesmo compromisso, quando entro no raio no dia anterior, então nada acontece e a chegada no dia certo continua sendo detectada. *(regra do período: `JanelaChegadaTest`)*
+- **d.** Dado o app fechado (processo encerrado), quando entro no raio dentro do período, então a chegada é detectada da mesma forma.
+- **e.** Dado um destino sem coordenadas, quando salvo, então o compromisso é salvo normalmente, sem detecção de chegada (COMP-08).
+- Limitação conhecida: se o usuário já estiver dentro do raio quando o período começar e não sair dele, a chegada não é detectada.
+- 🧪 Implementado em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/); aguarda os roteiros manuais R1–R4.
 
 ### LEMB-10 · Precisão e Doze — 🧪
 Os alarmes DEVEM ser exatos e disparar mesmo com o aparelho em Doze

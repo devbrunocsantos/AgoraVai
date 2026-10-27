@@ -2,7 +2,7 @@
 
 - **Spec:** [`spec.md`](spec.md) · **Plano:** [`plan.md`](plan.md)
 - **Branch:** `ccr-80e3a1a2-ocxhin`
-- **Início / fim:** 2026-10-27 / —
+- **Início / fim:** 2026-10-27 / — (código concluído em 2026-10-27; faltam os roteiros manuais)
 
 ## Progresso por fase
 
@@ -39,9 +39,10 @@ JanelaChegadaTest: tests=5 failures=0
 ```
 
 ## Incorporação nas specs vivas
-- [ ] Delta incorporado em `specs/capabilities/lembretes.md` e `compromissos.md`
-- [ ] `specs/architecture.md` atualizado
-- [ ] `spec.md` marcada como **Concluída**
+- [x] Delta incorporado em `specs/capabilities/lembretes.md` (LEMB-09), `compromissos.md` (COMP-08) e `automacoes.md` (AUTO-08), com status 🧪 até os roteiros passarem
+- [x] `specs/architecture.md` atualizado (DT-01 e DT-20 🧪, §3.2, §5.3.1, histórico 1.4)
+- [ ] `spec.md` marcada como **Concluída**: depois dos roteiros R1–R5
 
 ## Pendências / follow-ups
-- …
+- Geofences de chegada **não sobrevivem a reiniciar o aparelho**: é a mudança `reagendar-apos-reiniciar`, que já usa `addGeofenceChegada(compromisso, etapas)`.
+- O `NotificationScheduler.createNotificationChannel` continua só na `MainActivity`. Se um receiver notificar antes de o app ter sido aberto uma vez após a instalação, o canal não existe. Raro, mas vale mover para o `AgoraVaiApplication` numa mudança futura.

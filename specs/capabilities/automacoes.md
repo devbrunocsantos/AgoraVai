@@ -52,11 +52,11 @@ com "Pronto para iniciar sua sessão de '<título>'?" e as ações "Iniciar" e
 "Ignorar". "Iniciar" DEVE começar o Pomodoro com a meta da automação.
 "Ignorar" ou dispensar a notificação DEVE apenas fechá-la.
 
-### AUTO-08 · Automação de uso único — ⚠️ DT-01
+### AUTO-08 · Automação de uso único — 🧪
 ONDE a repetição está desligada, depois de sugerir a sessão o sistema DEVE
 arquivar a automação no histórico e remover a geofence dela.
 
-- Hoje: quando isso acontece com o app fechado, a geofence não é removida, porque o `GeofenceManager` só é inicializado pela tela principal.
+- 🧪 A remoção da geofence com o app fechado foi corrigida em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/) (o `GeofenceManager` agora é inicializado no `Application`); aguarda verificação em aparelho.
 
 ### AUTO-09 · Ativar e desativar — ✅ / ⚠️ DT-07
 O switch na lista DEVE ativar ou desativar a automação, reagendando ou

@@ -109,6 +109,7 @@ infraestrutura (`object`). Estado reativo via `StateFlow`/`SharedFlow`.
 | `network` | Retrofit + modelos da Directions API |
 | `notifications` | Canal de notificação, `CompromissoAlarmScheduler` (agenda e cancela todos os lembretes de um compromisso), `HorariosLembrete` (cálculo puro dos horários), `NotificationScheduler` (AlarmManager), `AlarmReceiver` e as constantes `EXTRA_*` |
 | `services` | `PomodoroService`, `PomodoroScheduler` (WorkManager), estados globais (`PomodoroTimerState`, `FocusSessionState`, `PomodoroCompletionState`, `AppForegroundState`), `NotificationActionReceiver` |
+| *(raiz)* | `AgoraVaiApplication` inicializa os managers de geofence para que funcionem em qualquer processo (receivers, workers); `MainActivity` |
 | `services/geofence` | `GeofenceManager` (automações), `CompromissoGeofenceManager` (chegada), `GeofenceBroadcastReceiver` |
 | `workers` | `PomodoroWorker` (avalia condições de uma automação) |
 | `billing` | `BillingClientManager` (bypass), `SubscriptionManager` (não usado) |
@@ -222,6 +223,10 @@ percorrendo a lista ao contrário, subtraindo a duração de cada uma.
   mostra itens e o mecanismo de dispensa do tipo e, ao confirmar, envia
   `CONFIRM_EXIT` ao `NotificationActionReceiver`.
 
+### 5.3.1 Detecção de chegada (`GeofenceBroadcastReceiver`)
+- Registro (`CompromissoGeofenceManager.addGeofenceChegada`): raio de 200 m, só `ENTER`, `INITIAL_TRIGGER_ENTER`, expiração no fim do período de chegada (`fimDaJanelaDeChegada` = evento + 2 h). Não registra se não houver coordenadas, se o compromisso estiver desativado ou se o período já tiver terminado.
+- Recebimento (`handleCompromissoChegada`, com `goAsync`): lê o compromisso com as etapas, e fora do período (`estaNaJanelaDeChegada`) ignora sem remover a geofence. Dentro do período: `confirmarSaida` + `confirmarChegada`, `CompromissoAlarmScheduler.cancelar`, fecha a notificação de saída, notifica a chegada (`id*100+999`) e remove a geofence.
+
 ### 5.4 Pomodoro (`PomodoroService`)
 Máquina de estados (`PomodoroState`: `PARADO, FOCO, PAUSA_CURTA, PAUSA_LONGA`;
 `TimerState`: `PARADO, RODANDO, PAUSADO`). O estado vive no singleton
@@ -291,7 +296,7 @@ Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠
 
 | # | Severidade | Problema | Onde |
 |---|---|---|---|
-| DT-01 | **Alta** | `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. Além disso, os dois managers de geofence só são inicializados pela `MainActivity`, então receivers e workers em segundo plano não conseguem remover geofences (AUTO-08). | `MainActivity.onCreate`, managers de geofence |
+| DT-01 | **Alta** | 🧪 *Corrigido em [`deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/), aguardando verificação em aparelho.* `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. Além disso, os dois managers de geofence só são inicializados pela `MainActivity`, então receivers e workers em segundo plano não conseguem remover geofences (AUTO-08). | `MainActivity.onCreate`, managers de geofence |
 | DT-02 | **Alta** | 🧪 *Corrigido em [`lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/), aguardando verificação em aparelho.* Chaves de extra divergentes: o ViewModel grava `"EXTRA_TITLE"`, `"EXTRA_MESSAGE"`, `"EXTRA_NOTIFICATION_ID"`, `"EXTRA_HAS_ACTION"`, `"EXTRA_ACTION_INTENT"`, `"EXTRA_ACTION_TITLE"`, mas o `AlarmReceiver` lê as constantes `"extra_title"`, `"extra_message"`… Resultado: o lembrete de saída sai com título/mensagem padrão, ID aleatório e **sem o botão "Já Saí"**. | `CompromissoViewModel.agendarAlarmeSaidaComAction`, `AlarmReceiver` |
 | DT-03 | **Alta** | `fallbackToDestructiveMigration` + `exportSchema=false`: qualquer mudança de schema **apaga todos os dados do usuário**. Os schemas em `app/schemas` (v3, v4) estão desatualizados (DB está na v10). | `AppDatabase` |
 | DT-04 | Alta | Repetição de compromissos (COMP-13) é só armazenada: os alarmes são únicos e não são reagendados para a próxima ocorrência. | `CompromissoViewModel.agendarAlarmes` |
@@ -308,7 +313,7 @@ Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠
 | DT-15 | Baixa | `TimePickerDialog` duplicado (`MainActivity.kt` e `AddCompromissoScreen.kt`); arquivos com várias declarações numa linha só. | UI |
 | DT-16 | Média | 🧪 *Corrigido em [`lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/), aguardando verificação em aparelho.* Ao confirmar a saída na `ReminderActivity`, o broadcast `CONFIRM_EXIT` vai sem `EXTRA_NOTIFICATION_ID` e a notificação de tela cheia (`ongoing`) continua na bandeja (LEMB-07). | `ReminderActivity.confirmarSaida`, `AlarmReceiver` |
 | DT-17 | Média | 🧪 *Corrigido em [`lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/), aguardando verificação em aparelho.* Sem permissão de alarme exato (Android 12+), `NotificationScheduler.scheduleAlarm` só registra no log, enquanto os helpers do ViewModel chamam `setExactAndAllowWhileIdle` no `else` e lançam `SecurityException`, que vira "Erro ao salvar." com o compromisso já gravado (LEMB-10). | `NotificationScheduler`, `CompromissoViewModel` |
-| DT-20 | Média | `CompromissoViewModel.tempLatDestino/tempLngDestino` são campos do ViewModel que não são zerados entre salvamentos. Se o Geocoder falhar, o compromisso herda as coordenadas do anterior e a detecção de chegada (LEMB-09) usaria o destino errado. | `CompromissoViewModel.salvarCompromisso` |
+| DT-20 | Média | 🧪 *Corrigido em [`deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/), aguardando verificação em aparelho.* `CompromissoViewModel.tempLatDestino/tempLngDestino` são campos do ViewModel que não são zerados entre salvamentos. Se o Geocoder falhar, o compromisso herda as coordenadas do anterior e a detecção de chegada (LEMB-09) usaria o destino errado. | `CompromissoViewModel.salvarCompromisso` |
 | DT-19 | Alta | 🧪 *Corrigido em [`lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/), aguardando verificação em aparelho.* A notificação de tela cheia não tem `contentIntent`. No Android 14+, sem `USE_FULL_SCREEN_INTENT`, o lembrete vira uma notificação que não abre nada, e o usuário não consegue confirmar a saída (LEMB-04). | `AlarmReceiver.showFullScreenAlarm` |
 | DT-18 | Média | `PomodoroService.onStartCommand` recalcula a meta a cada comando: PAUSE/START sem `EXTRA_CYCLES` trocam a meta da automação pela meta diária (POMO-05). | `PomodoroService` |
 
@@ -339,4 +344,5 @@ Novas decisões são registradas aqui a partir da fase **Plan** (constituição 
 | 1.0 | 2026-10-25 | Versão inicial, engenharia reversa do código (app 1.5). |
 | 1.1 | 2026-10-26 | Requisitos movidos para `specs/capabilities/` (Spec-Driven Development); DT-16 a DT-18 adicionados. |
 | 1.2 | 2026-10-26 | DT-19 adicionado, DT-01 ampliado, versões reais do build corrigidas (§3.3, §8). |
+| 1.4 | 2026-10-27 | Mudança `deteccao-de-chegada`: `AgoraVaiApplication`, fluxo de chegada (§5.3.1); DT-01 e DT-20 corrigidos (🧪). |
 | 1.3 | 2026-10-26 | Mudança `lembrete-de-saida`: `CompromissoAlarmScheduler` e `HorariosLembrete` (§3.2, §5.2); DT-02, DT-06, DT-16, DT-17 e DT-19 corrigidos (🧪); DT-20 adicionado. |
