@@ -11,7 +11,7 @@
 | 1 — Application | ✅ feito | ver `git log` ("chegada fase 1") | build ✅ · testes ✅ · `AgoraVaiApplication` presente no manifest mesclado ✅ · `dumpsys location` ⏳ (aparelho) |
 | 2 — Regra do período | ✅ feito | ver `git log` ("chegada fase 2") | build ✅ · testes 9/9 ✅ |
 | 3 — Registro e receiver | ✅ feito | ver `git log` ("chegada fase 3") | build ✅ · testes 9/9 ✅ · manual R1–R4 ⏳ (aparelho) |
-| 4 — Coordenadas não vazam (DT-20) | ⬜ pendente | | |
+| 4 — Coordenadas não vazam (DT-20) | ✅ feito | ver `git log` ("chegada fase 4") | build ✅ · testes 9/9 ✅ · manual R5 ⏳ (aparelho) |
 
 ## Desvios do plano
 - **Aprovação:** a Fase 4 (DT-20, critério COMP-08.a) foi acrescentada ao plano na aprovação, conforme proposto ao fim da mudança `lembrete-de-saida`.
@@ -28,6 +28,7 @@
 | LEMB-09.c | ⏳ código pronto, falta roteiro R2 | Fora do período retorna sem remover a geofence |
 | LEMB-09.d | ⏳ código pronto, falta roteiro R3 | `goAsync()` + managers inicializados no `AgoraVaiApplication` |
 | LEMB-09.e | ⏳ código inalterado, falta roteiro R4 | `addGeofenceChegada` continua ignorando coordenadas `0.0` |
+| COMP-08.a | ⏳ código pronto, falta roteiro R5 | `tempLatDestino/tempLngDestino` agora são locais a cada salvamento, iniciando em `0.0` |
 
 ## Saída das verificações
 ```

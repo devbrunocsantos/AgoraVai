@@ -83,8 +83,6 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
     val addCompromissoUiState: StateFlow<AddCompromissoUiState> = _addCompromissoUiState.asStateFlow()
 
     private val defaultSafetyTime = SettingsManager.safetyTime
-    private var tempLatDestino: Double = 0.0
-    private var tempLngDestino: Double = 0.0
 
     init {
         viewModelScope.launch { try { dao.deleteExpiredCompromissos(System.currentTimeMillis()) } catch (e: Exception) { Log.e("CompromissoVM", "Erro clean", e) } }
@@ -157,6 +155,9 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
 
         viewModelScope.launch {
             try {
+                // Coordenadas locais a cada salvamento: se o Geocoder falhar, ficam 0.0 e não herdam as do compromisso anterior (COMP-08.a)
+                var tempLatDestino = 0.0
+                var tempLngDestino = 0.0
                 val geocoder = Geocoder(context, Locale.getDefault())
                 try {
                     @Suppress("DEPRECATION") val list = geocoder.getFromLocationName(currentState.destino, 1)
