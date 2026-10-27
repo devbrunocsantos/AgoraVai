@@ -9,7 +9,7 @@
 | Fase | Status | Commit | Verificação |
 |---|---|---|---|
 | 1 — Application | ✅ feito | ver `git log` ("chegada fase 1") | build ✅ · testes ✅ · `AgoraVaiApplication` presente no manifest mesclado ✅ · `dumpsys location` ⏳ (aparelho) |
-| 2 — Regra do período | ⬜ pendente | | |
+| 2 — Regra do período | ✅ feito | ver `git log` ("chegada fase 2") | build ✅ · testes 9/9 ✅ |
 | 3 — Registro e receiver | ⬜ pendente | | |
 | 4 — Coordenadas não vazam (DT-20) | ⬜ pendente | | |
 
@@ -20,11 +20,14 @@
 
 | Critério | Resultado | Evidência |
 |---|---|---|
+| LEMB-09.a / .c (regra do período) | ✅ | `JanelaChegadaTest` (dentro, antes do preparo, dia anterior, limites 8:30 e 12:00/12:01) |
 
 ## Saída das verificações
 ```
 $ ./gradlew testDebugUnitTest assembleDebug
 BUILD SUCCESSFUL
+HorariosLembreteTest: tests=4 failures=0
+JanelaChegadaTest: tests=5 failures=0
 ```
 
 ## Incorporação nas specs vivas

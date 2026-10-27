@@ -39,3 +39,12 @@ fun calcularHorarios(
         inicioPreparo = proximoHorario
     )
 }
+
+// LEMB-09: a chegada só conta do início do preparo até este tempo depois do evento
+const val HORAS_APOS_EVENTO_JANELA_CHEGADA = 2
+
+fun fimDaJanelaDeChegada(dataHoraEvento: Long): Long =
+    dataHoraEvento + HORAS_APOS_EVENTO_JANELA_CHEGADA * 60 * MINUTO_MS
+
+fun estaNaJanelaDeChegada(agora: Long, horarios: HorariosLembrete, dataHoraEvento: Long): Boolean =
+    agora >= horarios.inicioPreparo && agora <= fimDaJanelaDeChegada(dataHoraEvento)
