@@ -48,3 +48,7 @@ fun fimDaJanelaDeChegada(dataHoraEvento: Long): Long =
 
 fun estaNaJanelaDeChegada(agora: Long, horarios: HorariosLembrete, dataHoraEvento: Long): Boolean =
     agora >= horarios.inicioPreparo && agora <= fimDaJanelaDeChegada(dataHoraEvento)
+
+// LEMB-09: o monitoramento da chegada começa no início do período. Se o usuário já
+// estiver no destino nesse momento, a entrada inicial já conta como chegada
+fun inicioMonitoramentoChegada(horarios: HorariosLembrete): Long = horarios.inicioPreparo

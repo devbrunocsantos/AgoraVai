@@ -24,6 +24,7 @@ object CompromissoAlarmScheduler {
 
     fun idAlarmeEtapa(compromissoId: Long, indiceInvertido: Int) = (compromissoId.toInt() * 100) + indiceInvertido
     fun idAlarmeSaida(compromissoId: Long) = (compromissoId.toInt() * 100) + 99
+    fun idAlarmeAtivacaoChegada(compromissoId: Long) = (compromissoId.toInt() * 100) + 97
     private fun requestCodeConfirmarSaida(compromissoId: Long) = compromissoId.toInt()
     private fun requestCodeVerificacaoAtraso(compromissoId: Long) = compromissoId.toInt() + 9999
 
@@ -55,6 +56,13 @@ object CompromissoAlarmScheduler {
 
         agendarSaida(context, compromisso, horarios.saida, itens)
         agendarExato(context, horarios.verificacaoAtraso, pendingVerificacaoAtraso(context, compromisso.id))
+
+        // LEMB-09: a geofence de chegada só é registrada no início do período. Se esse horário
+        // já passou (ex.: religar no meio do período), o AlarmManager dispara na hora
+        val temCoordenadas = compromisso.latitudeDestino != 0.0 && compromisso.longitudeDestino != 0.0
+        if (temCoordenadas && fimDaJanelaDeChegada(compromisso.dataHoraEvento) > System.currentTimeMillis()) {
+            agendarExato(context, inicioMonitoramentoChegada(horarios), pendingAtivacaoChegada(context, compromisso.id))
+        }
     }
 
     fun cancelar(context: Context, compromissoId: Long, numEtapas: Int) {
@@ -63,6 +71,8 @@ object CompromissoAlarmScheduler {
         }
         NotificationScheduler.cancelAlarm(context, idAlarmeSaida(compromissoId))
         cancelarVerificacaoAtraso(context, compromissoId)
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingAtivacaoChegada(context, compromissoId))
     }
 
     fun cancelarVerificacaoAtraso(context: Context, compromissoId: Long) {
@@ -116,6 +126,19 @@ object CompromissoAlarmScheduler {
         return PendingIntent.getBroadcast(
             context,
             requestCodeVerificacaoAtraso(compromissoId),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
+    private fun pendingAtivacaoChegada(context: Context, compromissoId: Long): PendingIntent {
+        val intent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.Actions.ATIVAR_CHEGADA.toString()
+            putExtra(EXTRA_COMPROMISSO_ID, compromissoId)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            idAlarmeAtivacaoChegada(compromissoId),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )

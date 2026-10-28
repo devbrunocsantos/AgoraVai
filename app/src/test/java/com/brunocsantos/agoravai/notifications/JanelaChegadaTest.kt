@@ -44,4 +44,14 @@ class JanelaChegadaTest {
         assertTrue(estaNaJanelaDeChegada(em(27, 12, 0), horarios, evento))
         assertFalse(estaNaJanelaDeChegada(em(27, 12, 1), horarios, evento))
     }
+
+    // LEMB-09.f: o monitoramento começa exatamente no início do período, para que quem já
+    // está no destino tenha a chegada detectada dentro do período (e não antes dele)
+    @Test
+    fun `LEMB-09f monitoramento comeca no inicio do periodo de chegada`() {
+        val inicio = inicioMonitoramentoChegada(horarios)
+
+        assertEquals(em(27, 8, 30), inicio)
+        assertTrue(estaNaJanelaDeChegada(inicio, horarios, evento))
+    }
 }

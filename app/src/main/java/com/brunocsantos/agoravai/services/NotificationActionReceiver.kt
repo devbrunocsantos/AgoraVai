@@ -10,6 +10,7 @@ import com.brunocsantos.agoravai.data.AppDatabase
 import com.brunocsantos.agoravai.notifications.CHANNEL_ID
 import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
 import com.brunocsantos.agoravai.notifications.EXTRA_ACTION_NOTIFICATION_ID
+import com.brunocsantos.agoravai.services.geofence.CompromissoGeofenceManager
 import com.brunocsantos.agoravai.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +56,24 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 }
             }
 
+            // --- Início do período de chegada: começa a monitorar o destino (LEMB-09) ---
+            Actions.ATIVAR_CHEGADA.toString() -> {
+                if (compromissoId != -1L) {
+                    val pendingResult = goAsync()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val dados = AppDatabase.getDatabase(context).appDao().getCompromissoComEtapasById(compromissoId)
+                            if (dados != null && !dados.compromisso.confirmouChegada) {
+                                // INITIAL_TRIGGER_ENTER: quem já está no destino tem a chegada detectada agora
+                                CompromissoGeofenceManager.addGeofenceChegada(dados.compromisso, dados.etapas)
+                            }
+                        } finally {
+                            pendingResult.finish()
+                        }
+                    }
+                }
+            }
+
             // --- NOVA AÇÃO: Checar se está atrasado ---
             Actions.CHECK_LATE.toString() -> {
                 if (compromissoId != -1L) {
@@ -85,6 +104,6 @@ class NotificationActionReceiver : BroadcastReceiver() {
     }
 
     enum class Actions {
-        START, DISMISS, CONFIRM_EXIT, CHECK_LATE
+        START, DISMISS, CONFIRM_EXIT, CHECK_LATE, ATIVAR_CHEGADA
     }
 }

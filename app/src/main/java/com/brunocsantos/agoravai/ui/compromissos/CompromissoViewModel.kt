@@ -214,7 +214,6 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
                     dao.inserirItensLembrete(itensParaSalvar)
 
                     val finalCompromisso = compromissoParaSalvar.copy(id = compromissoId)
-                    CompromissoGeofenceManager.addGeofenceChegada(finalCompromisso, etapasParaSalvar)
                     CompromissoAlarmScheduler.agendar(context, finalCompromisso, etapasParaSalvar, validatedItens.map { it.nome })
                     onSuccess()
                 } else { _addCompromissoUiState.update { it.copy(saveError = "Rota não encontrada.") } }
@@ -231,7 +230,7 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
         viewModelScope.launch {
             val updated = c.compromisso.copy(isEnabled = isEnabled)
             dao.updateCompromisso(updated)
-            if (isEnabled) { CompromissoAlarmScheduler.agendar(applicationContext, updated, c.etapas, c.itensLembrete.map { it.nomeItem }); CompromissoGeofenceManager.addGeofenceChegada(updated, c.etapas) }
+            if (isEnabled) { CompromissoAlarmScheduler.agendar(applicationContext, updated, c.etapas, c.itensLembrete.map { it.nomeItem }) }
             else { CompromissoAlarmScheduler.cancelar(applicationContext, updated.id, c.etapas.size); CompromissoGeofenceManager.removeGeofence(updated.id) }
         }
     }
