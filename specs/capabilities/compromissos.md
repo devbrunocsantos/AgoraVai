@@ -69,33 +69,33 @@ pelo Geocoder. A falha NÃO DEVE impedir o salvamento: as coordenadas ficam
 `0.0` e a detecção de chegada (LEMB-09) é desativada para o compromisso.
 
 - **a.** Dado que salvei o compromisso A, com destino resolvido pelo Geocoder, quando salvo o compromisso B, cujo destino o Geocoder não resolve, então B fica sem coordenadas e sem detecção de chegada (e não herda as coordenadas de A).
-- 🧪 Corrigido (DT-20) em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/); aguarda o roteiro manual R5.
+- 🧪 Corrigido (DT-20) em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/). Teste B4 (2026-10-28) inconclusivo: o endereço inexistente foi aceito pela Directions API com 0 min de percurso (DT-21), então não dá para saber se o Geocoder o resolveu.
 
 ### COMP-09 · Edição — ✅
 QUANDO o usuário toca em editar, o sistema DEVE abrir o formulário preenchido.
 Ao salvar, o sistema DEVE substituir etapas e itens, zerar `confirmouSaida` e
 `confirmouChegada`, cancelar alarmes e geofence antigos e agendar os novos.
 
-### COMP-10 · Ativar e desativar — 🧪
+### COMP-10 · Ativar e desativar — ✅
 QUANDO o usuário desliga o switch, o sistema DEVE cancelar os alarmes e a
 geofence do compromisso e exibi-lo esmaecido. QUANDO religa, o sistema DEVE
 reagendar alarmes e geofence (sujeito a LEMB-10).
 
 - **a.** Dado um compromisso desativado antes do horário de saída, quando passa o horário de saída + 10 min, então nenhum lembrete de saída nem aviso de atraso aparece.
-- 🧪 Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R5.
+- ✅ Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); verificado em aparelho real em 2026-10-28 (teste A5: nada tocou).
 
 > Observação: religar um compromisso cujo horário já passou agenda alarmes no
 > passado, e o `AlarmManager` dispara na hora. Nenhum requisito cobre esse
 > caso ainda (pergunta em aberto).
 
-### COMP-11 · Exclusão — 🧪
+### COMP-11 · Exclusão — ✅
 QUANDO o usuário toca em excluir, o sistema DEVE pedir confirmação ("Tem certeza
 de que deseja excluir o compromisso "<título>"? Todas as notificações agendadas
 serão canceladas."). Ao confirmar, o sistema DEVE apagar o compromisso, suas
 etapas e itens (cascata) e cancelar alarmes e geofence.
 
 - **b.** Dado um compromisso excluído, quando passa o horário de saída + 10 min, então nenhum aviso de atraso aparece.
-- 🧪 Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R5.
+- ✅ Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); verificado em aparelho real em 2026-10-28 (teste A5: nada tocou).
 
 ### COMP-12 · Lista — ✅
 O sistema DEVE listar os compromissos em ordem crescente de data/hora, com

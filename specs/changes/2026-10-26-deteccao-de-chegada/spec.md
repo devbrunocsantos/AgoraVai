@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Implementada em 2026-10-27 — aguardando roteiros manuais (R1–R5) para ser Concluída · Aprovada em 2026-10-27 por Bruno C. Santos
+- **Status:** Implementada em 2026-10-27 · Aprovada em 2026-10-27 por Bruno C. Santos · **Revisão 2 em rascunho (2026-10-28), aguardando aprovação**
 - **Capacidades afetadas:** `capabilities/lembretes.md`
 - **DTs relacionados:** DT-01, DT-20
 - **Depende de:** `2026-10-26-lembrete-de-saida` (usa o agendador para cancelar lembretes)
@@ -55,3 +55,26 @@ período, estar no local não conta.
 ## 6. Perguntas em aberto
 - [x] **Q3 —** o período "do início do preparo até 2 h depois do evento" está bom? (2 h cobre quem chega atrasado.) **Decisão: aprovado.**
 - [x] **Q4 —** chegar deve mesmo cancelar os lembretes pendentes e marcar a saída? Recomendo que sim. **Decisão: sim.**
+
+---
+
+## Revisão 2 — Rascunho (2026-10-28)
+
+**Motivo:** no teste em aparelho, o compromisso foi criado com o usuário já no
+destino. A chegada nunca foi detectada e "HORA DE SAIR" tocou. O Android só
+avisa *entradas* no raio: a entrada que acontece ao salvar cai antes do período
+e é ignorada, e depois disso não há outra. Na vida real isso acontece quando o
+compromisso é no lugar onde a pessoa já está (reunião no prédio do trabalho,
+consulta no mesmo bairro).
+
+### ALTERADO
+
+#### LEMB-09 · Detecção de chegada
+- **Antes:** … Entradas no raio fora desse período DEVEM ser ignoradas. O monitoramento DEVE terminar sozinho 2 horas depois do horário do evento.
+- **Depois:** igual, acrescentando: **SE o usuário já estiver dentro do raio quando o período de chegada começar, ENTÃO o sistema DEVE considerar a chegada nesse momento.** O monitoramento DEVE começar no início do período, e não antes.
+- **Critério de aceite novo:**
+  - **f.** Dado que estou no destino quando salvo o compromisso e continuo lá, quando o preparo começa, então recebo "Você chegou! 🏁", e "HORA DE SAIR" e "Você está atrasado!" não tocam.
+- **Fora de escopo:** o caso de borda "já dentro do raio quando o período começar" deixa de ser limitação.
+
+### Perguntas
+- [ ] **Q6 —** aprovar a Revisão 2? Ela também torna possível testar a chegada **sem simular localização**: basta criar o compromisso estando no destino, que foi o que você fez.

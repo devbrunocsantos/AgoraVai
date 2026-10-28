@@ -23,7 +23,7 @@ partir do horário de saída, na ordem definida pelo usuário.
 
 - **a.** Dadas a saída às 9:00 e as etapas [Banho 15, Café 10], então "Banho" dispara às 8:35 e "Café" às 8:50. *(teste: `HorariosLembreteTest`)*
 
-### LEMB-02 · Lembrete "Hora de sair" — 🧪
+### LEMB-02 · Lembrete "Hora de sair" — ✅
 No horário de saída, o sistema DEVE disparar o lembrete com título
 "HORA DE SAIR: <título>" e mensagem "Saia agora! Não esqueça seus itens." (se
 houver itens) ou "Saia agora para chegar a tempo!". O estilo segue o tipo
@@ -31,16 +31,16 @@ escolhido (LEMB-03 a LEMB-06).
 
 - **a.** Dado o compromisso "Dentista" com os itens [Chaves], quando chega o horário de saída, então o lembrete mostra "HORA DE SAIR: Dentista" e "Saia agora! Não esqueça seus itens.".
 - **b.** Dado um compromisso sem itens, quando chega o horário de saída, então a mensagem é "Saia agora para chegar a tempo!".
-- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R1.
+- ✅ Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); verificado em aparelho real em 2026-10-28 (testes A1, A2).
 
-### LEMB-03 · Estilo PADRAO — 🧪
+### LEMB-03 · Estilo PADRAO — ✅
 ONDE o tipo é `PADRAO`, o sistema DEVE mostrar uma notificação de alta prioridade
 cujo texto expandido termine com "📌 Não esqueça: <itens separados por vírgula>"
 e que tenha a ação "Já Saí".
 
 - **a.** Dado o tipo `PADRAO`, quando o lembrete de saída aparece, então ele tem a ação "Já Saí" e o texto expandido termina com "📌 Não esqueça: Chaves".
 - **b.** Quando toco em "Já Saí", então a notificação some e o aviso de atraso (LEMB-08) não aparece.
-- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R1.
+- ✅ Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); verificado em aparelho real em 2026-10-28 (teste A1).
 
 ### LEMB-04 · Estilos de tela cheia (ALARME) — 🧪
 ONDE o tipo é `ALARME`, `INSISTENTE` ou `DESAFIO`, o sistema DEVE abrir uma tela
@@ -52,7 +52,7 @@ DEVE ficar na bandeja até a saída ser confirmada.
 
 - **a.** Dado o tipo `ALARME` com a tela bloqueada, quando chega o horário de saída, então a tela acende e mostra "JÁ ESTOU SAINDO".
 - **b.** Dado que o sistema exibiu só a notificação (sem tela cheia), quando toco nela, então a tela do lembrete abre.
-- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda os roteiros manuais R2 e R3.
+- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/). **a** verificado em aparelho real em 2026-10-28 (teste A3); **b** aguarda o teste A4 (tela cheia negada).
 
 ### LEMB-05 · Estilo INSISTENTE — ✅
 ONDE o tipo é `INSISTENTE`, a tela cheia DEVE exigir que o usuário segure o
@@ -62,7 +62,7 @@ botão "SEGURE" por 3 segundos contínuos. Soltar antes zera o progresso.
 ONDE o tipo é `DESAFIO`, a tela cheia DEVE manter "CONFIRMAR SAÍDA" desabilitado
 até o usuário digitar "JÁ FIZ" (sem diferenciar maiúsculas e ignorando espaços nas pontas).
 
-### LEMB-07 · Confirmar saída — 🧪
+### LEMB-07 · Confirmar saída — ✅
 QUANDO o usuário confirma a saída (ação "Já Saí" ou botão da tela cheia), o
 sistema DEVE gravar `confirmouSaida = true`, fechar o lembrete de saída e
 impedir o aviso de atraso (LEMB-08).
@@ -70,7 +70,7 @@ impedir o aviso de atraso (LEMB-08).
 - **a.** ✅ `confirmouSaida` é gravado.
 - **b.** Dada a tela cheia aberta, quando confirmo a saída, então a tela fecha e a notificação do lembrete some da bandeja.
 - **c.** Dada a saída confirmada, quando se passam 10 min do horário de saída, então "Você está atrasado!" não aparece.
-- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R2.
+- ✅ Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); verificado em aparelho real em 2026-10-28 (testes A1, A3).
 
 ### LEMB-08 · Aviso de atraso — ✅
 QUANDO se passarem 10 min do horário de saída, SE a saída não tiver sido
@@ -97,7 +97,7 @@ terminar sozinho 2 horas depois do horário do evento.
 - **d.** Dado o app fechado (processo encerrado), quando entro no raio dentro do período, então a chegada é detectada da mesma forma.
 - **e.** Dado um destino sem coordenadas, quando salvo, então o compromisso é salvo normalmente, sem detecção de chegada (COMP-08).
 - Limitação conhecida: se o usuário já estiver dentro do raio quando o período começar e não sair dele, a chegada não é detectada.
-- 🧪 Implementado em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/); aguarda os roteiros manuais R1–R4.
+- 🧪 Implementado em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/). Em aparelho (2026-10-28): **c** (primeira parte, entrada antes do período ignorada) verificado; **a**, **b** e **d** ainda não, porque o teste foi feito já dentro do raio, o que caiu na limitação acima. Proposta de revisão: ver a spec da mudança.
 
 ### LEMB-10 · Precisão e Doze — 🧪
 Os alarmes DEVEM ser exatos e disparar mesmo com o aparelho em Doze
@@ -109,7 +109,7 @@ DEVE salvar nem reativar. Ao salvar, a mensagem DEVE oferecer a ação
 
 - **a.** Dada a permissão de alarmes exatos negada, quando salvo um compromisso válido, então vejo a mensagem com "Abrir configurações" e nada é gravado.
 - **b.** Dada a permissão negada, quando religo um compromisso desativado, então vejo a mensagem e o switch continua desligado.
-- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro manual R4.
+- 🧪 Corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); aguarda o roteiro R4, que exige Android 12/12L (no 13+ a permissão é concedida automaticamente).
 
 ### LEMB-11 · Sobreviver a reinicialização — ⬜ DT-05
 QUANDO o aparelho reiniciar ou a hora do sistema mudar, o sistema DEVE

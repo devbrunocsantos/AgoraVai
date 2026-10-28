@@ -24,14 +24,14 @@
 | LEMB-01.a (regressão) | ✅ | `HorariosLembreteTest` |
 | LEMB-08 (+10 min) | ✅ | `HorariosLembreteTest` |
 | COMP-07.a (regressão do cálculo) | ✅ | `HorariosLembreteTest` |
-| LEMB-02.a / .b | ⏳ código pronto, falta roteiro R1 | `CompromissoAlarmScheduler.agendarSaida` usa as constantes `EXTRA_TITLE`/`EXTRA_MESSAGE` |
-| LEMB-03.a / .b | ⏳ código pronto, falta roteiro R1 | `EXTRA_HAS_ACTION`/`EXTRA_ACTION_INTENT`/`EXTRA_ACTION_TITLE` corretos; `EXTRA_NOTIFICATION_ID` = `id*100+99`, o mesmo que a ação "Já Saí" fecha |
-| LEMB-04.a | ⏳ código inalterado, falta roteiro R2 | — |
-| LEMB-04.b | ⏳ código pronto, falta roteiro R3 | `setContentIntent(fullScreenPendingIntent)` em `AlarmReceiver.showFullScreenAlarm` |
-| LEMB-07.b / .c | ⏳ código pronto, falta roteiro R2 | `ReminderActivity` repassa `EXTRA_ACTION_NOTIFICATION_ID`; `CONFIRM_EXIT` fecha a notificação e cancela a verificação de atraso |
-| LEMB-10.a | ⏳ código pronto, falta roteiro R4 | `salvarCompromisso` checa `podeAgendarExato` antes de qualquer gravação; Snackbar com "Abrir configurações" |
-| LEMB-10.b | ⏳ código pronto, falta roteiro R4 | `toggleCompromisso` retorna antes de gravar e mostra um `Toast` |
-| COMP-10.a, COMP-11.b | ⏳ código pronto, falta roteiro R5 | `pendingVerificacaoAtraso` é a mesma fábrica para agendar e cancelar (com a ação `CHECK_LATE`) |
+| LEMB-02.a / .b | ✅ (aparelho real, 2026-10-28: testes A1, A2) | `CompromissoAlarmScheduler.agendarSaida` usa as constantes `EXTRA_TITLE`/`EXTRA_MESSAGE` |
+| LEMB-03.a / .b | ✅ (aparelho real, 2026-10-28: teste A1) | `EXTRA_HAS_ACTION`/`EXTRA_ACTION_INTENT`/`EXTRA_ACTION_TITLE` corretos; `EXTRA_NOTIFICATION_ID` = `id*100+99`, o mesmo que a ação "Já Saí" fecha |
+| LEMB-04.a | ✅ (aparelho real, 2026-10-28: teste A3) | — |
+| LEMB-04.b | ⏳ teste A4 pendente | `setContentIntent(fullScreenPendingIntent)` em `AlarmReceiver.showFullScreenAlarm` |
+| LEMB-07.b / .c | ✅ (aparelho real, 2026-10-28: testes A1, A3) | `ReminderActivity` repassa `EXTRA_ACTION_NOTIFICATION_ID`; `CONFIRM_EXIT` fecha a notificação e cancela a verificação de atraso |
+| LEMB-10.a | ⏳ R4 pendente: exige Android 12/12L | `salvarCompromisso` checa `podeAgendarExato` antes de qualquer gravação; Snackbar com "Abrir configurações" |
+| LEMB-10.b | ⏳ R4 pendente: exige Android 12/12L | `toggleCompromisso` retorna antes de gravar e mostra um `Toast` |
+| COMP-10.a, COMP-11.b | ✅ (aparelho real, 2026-10-28: teste A5) | Nem o desativado nem o excluído tocaram. O `dumpsys alarm` não foi possível no celular, mas o critério é o comportamento observável |
 
 ## Saída das verificações
 ```
@@ -43,7 +43,7 @@ HorariosLembreteTest: tests=4 failures=0 errors=0
 ## Incorporação nas specs vivas
 - [x] Delta incorporado em `specs/capabilities/lembretes.md` e `compromissos.md`, com status 🧪 até os roteiros passarem
 - [x] `specs/architecture.md` atualizado (DTs 🧪, §3.2, §5.2, DT-20, histórico 1.3)
-- [ ] `spec.md` marcada como **Concluída**: depois dos roteiros R1–R5. Ao passarem, trocar 🧪 por ✅ nas specs vivas e riscar os DTs.
+- [ ] `spec.md` marcada como **Concluída**: faltam A4 (LEMB-04.b) e R4 (LEMB-10). Verificados em 2026-10-28: A1, A2, A3, A5. Ao passarem, trocar 🧪 por ✅ nas specs vivas e riscar os DTs.
 
 ## Pendências / follow-ups
 - `PomodoroWorker` ainda usa o literal `"EXTRA_NOTIFICATION_ID"` (mesmo valor da constante; funciona). Trocar numa mudança do Pomodoro.

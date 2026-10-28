@@ -86,3 +86,20 @@ compromisso.
 ## 8. Atualização das specs ao final
 - [ ] `capabilities/lembretes.md`: LEMB-09 com o texto novo, status ✅
 - [ ] `architecture.md`: riscar DT-01; §3.2 `AgoraVaiApplication`; §5 fluxo de chegada; histórico
+
+---
+
+## Revisão 2 — Rascunho (2026-10-28), aguardando aprovação da spec
+
+### Fase 5 — O monitoramento começa no início do período
+- **Critérios cobertos:** LEMB-09.f (e mantém .a–.e)
+- **Abordagem:** em vez de registrar a geofence ao salvar, `CompromissoAlarmScheduler.agendar` passa a agendar também um **alarme de ativação** no início do preparo. Ao disparar (ação nova `ATIVAR_CHEGADA` no `NotificationActionReceiver`), o receiver registra a geofence com `INITIAL_TRIGGER_ENTER`. Se o usuário já estiver no raio, o Android dispara a entrada na hora, agora **dentro** do período, e a chegada é detectada. Se o horário já passou (ex.: religar o compromisso no meio do período), o `AlarmManager` dispara imediatamente, então é um caminho só.
+- **Ganhos extras:**
+  - não há geofence antes do período (menos bateria; LEMB-09.c passa a valer por construção);
+  - a mudança `reagendar-apos-reiniciar` herda o comportamento sem código extra, porque reagenda via `CompromissoAlarmScheduler.agendar`.
+- **Arquivos:** `notifications/CompromissoAlarmScheduler.kt` (agendar e cancelar o alarme de ativação), `services/NotificationActionReceiver.kt` (ação `ATIVAR_CHEGADA`, com `goAsync`), `ui/compromissos/CompromissoViewModel.kt` (deixa de chamar `addGeofenceChegada` direto), `notifications/HorariosLembrete.kt` + teste.
+- **Contrato novo (§5.2):** request code `compromissoId*100 + 97` para o alarme de ativação (mesma limitação de ≥ 97 etapas do DT-12).
+- **Verificação:**
+  - unitário: o horário de ativação é o início do preparo (`JanelaChegadaTest`);
+  - manual B5 (sem simular localização): no destino, criar o compromisso com o preparo começando em ~5 min, não sair do lugar → "Você chegou! 🏁" no início do preparo; "HORA DE SAIR" e atraso não tocam;
+  - manual B6: igual, mas fechando o app à força antes do preparo começar (LEMB-09.d).
