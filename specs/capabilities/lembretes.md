@@ -88,16 +88,19 @@ o início do preparo e 2 horas depois do horário do evento, o sistema DEVE:
 3. notificar "Você chegou! 🏁" com "Destino alcançado: <título>";
 4. parar de monitorar o destino.
 
-Entradas no raio fora desse período DEVEM ser ignoradas. O monitoramento DEVE
-terminar sozinho 2 horas depois do horário do evento.
+SE o usuário já estiver dentro do raio quando o período de chegada começar,
+ENTÃO o sistema DEVE considerar a chegada nesse momento. O monitoramento DEVE
+começar no início do período, e não antes. Entradas no raio fora desse período
+DEVEM ser ignoradas. O monitoramento DEVE terminar sozinho 2 horas depois do
+horário do evento.
 
 - **a.** Dado um compromisso às 10:00 com preparo começando às 8:30, quando entro no raio às 9:40, então recebo "Você chegou! 🏁" e o compromisso fica com chegada confirmada. *(regra do período: `JanelaChegadaTest`)*
 - **b.** Dado que cheguei às 9:10 e a saída era às 9:15, quando dá 9:15, então "HORA DE SAIR" não toca, e às 9:25 "Você está atrasado!" também não.
 - **c.** Dado o mesmo compromisso, quando entro no raio no dia anterior, então nada acontece e a chegada no dia certo continua sendo detectada. *(regra do período: `JanelaChegadaTest`)*
 - **d.** Dado o app fechado (processo encerrado), quando entro no raio dentro do período, então a chegada é detectada da mesma forma.
 - **e.** Dado um destino sem coordenadas, quando salvo, então o compromisso é salvo normalmente, sem detecção de chegada (COMP-08).
-- Limitação conhecida: se o usuário já estiver dentro do raio quando o período começar e não sair dele, a chegada não é detectada.
-- 🧪 Implementado em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/). Em aparelho (2026-10-28): **c** (primeira parte, entrada antes do período ignorada) verificado; **a**, **b** e **d** ainda não, porque o teste foi feito já dentro do raio, o que caiu na limitação acima. Proposta de revisão: ver a spec da mudança.
+- **f.** Dado que estou no destino quando salvo o compromisso e continuo lá, quando o preparo começa, então recebo "Você chegou! 🏁", e "HORA DE SAIR" e "Você está atrasado!" não tocam. *(início do monitoramento: `JanelaChegadaTest`)*
+- 🧪 Implementado em [`deteccao-de-chegada`](../changes/2026-10-26-deteccao-de-chegada/) (Revisão 2 em 2026-10-28). Em aparelho: **c** (entrada antes do período ignorada) verificado em 2026-10-28; **a**, **b**, **d** e **f** aguardam os testes B5 e B6.
 
 ### LEMB-10 · Precisão e Doze — 🧪
 Os alarmes DEVEM ser exatos e disparar mesmo com o aparelho em Doze

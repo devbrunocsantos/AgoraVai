@@ -12,6 +12,7 @@
 | 2 — Regra do período | ✅ feito | ver `git log` ("chegada fase 2") | build ✅ · testes 9/9 ✅ |
 | 3 — Registro e receiver | ✅ feito | ver `git log` ("chegada fase 3") | build ✅ · testes 9/9 ✅ · manual R1–R4 ⏳ (aparelho) |
 | 4 — Coordenadas não vazam (DT-20) | ✅ feito | ver `git log` ("chegada fase 4") | build ✅ · testes 9/9 ✅ · manual R5 ⏳ (aparelho) |
+| 5 — Monitoramento no início do período (Revisão 2) | ✅ feito | `355933f` | build ✅ · testes 10/10 ✅ · manual B5, B6 ⏳ (aparelho) |
 
 ## Desvios do plano
 - **Aprovação:** a Fase 4 (DT-20, critério COMP-08.a) foi acrescentada ao plano na aprovação, conforme proposto ao fim da mudança `lembrete-de-saida`.
@@ -28,6 +29,7 @@
 | LEMB-09.c | 🟨 parcial (aparelho real, 2026-10-28: teste B1) | Entrada antes do período foi ignorada ✅; a detecção posterior não foi verificada (ver B2) |
 | LEMB-09.d | ⏳ não verificado (B3 feito já dentro do raio, sem fechar à força) | `goAsync()` + managers inicializados no `AgoraVaiApplication` |
 | LEMB-09.e | ⏳ código inalterado, falta roteiro R4 | `addGeofenceChegada` continua ignorando coordenadas `0.0` |
+| LEMB-09.f | 🟨 regra ✅ (`JanelaChegadaTest`), comportamento aguarda o teste B5 | Alarme de ativação no início do preparo → geofence com `INITIAL_TRIGGER_ENTER` |
 | COMP-08.a | ⏳ inconclusivo (B4): a Directions API aceitou o endereço inexistente com 0 min (DT-21) | `tempLatDestino/tempLngDestino` agora são locais a cada salvamento, iniciando em `0.0` |
 
 ## Saída das verificações
@@ -35,7 +37,7 @@
 $ ./gradlew testDebugUnitTest assembleDebug
 BUILD SUCCESSFUL
 HorariosLembreteTest: tests=4 failures=0
-JanelaChegadaTest: tests=5 failures=0
+JanelaChegadaTest: tests=6 failures=0
 ```
 
 ## Incorporação nas specs vivas
@@ -50,5 +52,5 @@ O usuário não tinha como simular localização no celular, então criou os com
 - **B4 ⚠️:** endereço inexistente foi aceito com 0 min de percurso. Novo **DT-21** (correspondência aproximada da Directions API + arredondamento para baixo).
 
 ## Pendências / follow-ups
-- Geofences de chegada **não sobrevivem a reiniciar o aparelho**: é a mudança `reagendar-apos-reiniciar`, que já usa `addGeofenceChegada(compromisso, etapas)`.
+- Geofences de chegada **não sobrevivem a reiniciar o aparelho**: é a mudança `reagendar-apos-reiniciar`. Com a Revisão 2, basta reagendar via `CompromissoAlarmScheduler.agendar`, que já agenda a ativação da chegada. O plano daquela mudança precisa ser ajustado para isso.
 - O `NotificationScheduler.createNotificationChannel` continua só na `MainActivity`. Se um receiver notificar antes de o app ter sido aberto uma vez após a instalação, o canal não existe. Raro, mas vale mover para o `AgoraVaiApplication` numa mudança futura.

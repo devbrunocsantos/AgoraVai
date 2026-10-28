@@ -211,6 +211,7 @@ percorrendo a lista ao contrário, subtraindo a duração de cada uma.
 | PendingIntent da ação "Já Saí" | `compromissoId` |
 | Alarme de verificação de atraso | `compromissoId + 9999` |
 | Notificação de atraso | `compromissoId*100 + 98` |
+| Alarme de ativação da chegada (início do preparo) | `compromissoId*100 + 97` (ação `ATIVAR_CHEGADA`) |
 | Notificação de chegada | `compromissoId*100 + 999` |
 | Geofence de chegada | `"compromisso_chegada_<id>"` |
 | Geofence de automação | `"<automationId>"` (só dígitos) |
@@ -224,6 +225,7 @@ percorrendo a lista ao contrário, subtraindo a duração de cada uma.
   `CONFIRM_EXIT` ao `NotificationActionReceiver`.
 
 ### 5.3.1 Detecção de chegada (`GeofenceBroadcastReceiver`)
+- Ativação: `CompromissoAlarmScheduler.agendar` agenda um alarme no início do preparo (`inicioMonitoramentoChegada`), se houver coordenadas e o período não tiver terminado. O alarme chega ao `NotificationActionReceiver` (`ATIVAR_CHEGADA`), que registra a geofence. Assim quem já está no destino tem a entrada inicial disparada **dentro** do período (Revisão 2).
 - Registro (`CompromissoGeofenceManager.addGeofenceChegada`): raio de 200 m, só `ENTER`, `INITIAL_TRIGGER_ENTER`, expiração no fim do período de chegada (`fimDaJanelaDeChegada` = evento + 2 h). Não registra se não houver coordenadas, se o compromisso estiver desativado ou se o período já tiver terminado.
 - Recebimento (`handleCompromissoChegada`, com `goAsync`): lê o compromisso com as etapas, e fora do período (`estaNaJanelaDeChegada`) ignora sem remover a geofence. Dentro do período: `confirmarSaida` + `confirmarChegada`, `CompromissoAlarmScheduler.cancelar`, fecha a notificação de saída, notifica a chegada (`id*100+999`) e remove a geofence.
 
@@ -348,3 +350,4 @@ Novas decisões são registradas aqui a partir da fase **Plan** (constituição 
 | 1.3 | 2026-10-26 | Mudança `lembrete-de-saida`: `CompromissoAlarmScheduler` e `HorariosLembrete` (§3.2, §5.2); DT-02, DT-06, DT-16, DT-17 e DT-19 corrigidos (🧪); DT-20 adicionado. |
 | 1.4 | 2026-10-27 | Mudança `deteccao-de-chegada`: `AgoraVaiApplication`, fluxo de chegada (§5.3.1); DT-01 e DT-20 corrigidos (🧪). |
 | 1.5 | 2026-10-28 | Resultados dos testes em aparelho: DT-02, DT-06 e DT-16 resolvidos; DT-21 adicionado. |
+| 1.6 | 2026-10-28 | Revisão 2 da chegada: alarme de ativação no início do preparo (§5.2, §5.3.1). |

@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Implementada em 2026-10-27 · Aprovada em 2026-10-27 por Bruno C. Santos · **Revisão 2 em rascunho (2026-10-28), aguardando aprovação**
+- **Status:** Implementada em 2026-10-27 · Aprovada em 2026-10-27 por Bruno C. Santos · **Revisão 2 aprovada e implementada em 2026-10-28**, aguardando os testes B5 e B6
 - **Capacidades afetadas:** `capabilities/lembretes.md`
 - **DTs relacionados:** DT-01, DT-20
 - **Depende de:** `2026-10-26-lembrete-de-saida` (usa o agendador para cancelar lembretes)
@@ -58,7 +58,7 @@ período, estar no local não conta.
 
 ---
 
-## Revisão 2 — Rascunho (2026-10-28)
+## Revisão 2 — Aprovada (2026-10-28)
 
 **Motivo:** no teste em aparelho, o compromisso foi criado com o usuário já no
 destino. A chegada nunca foi detectada e "HORA DE SAIR" tocou. O Android só
@@ -77,4 +77,4 @@ consulta no mesmo bairro).
 - **Fora de escopo:** o caso de borda "já dentro do raio quando o período começar" deixa de ser limitação.
 
 ### Perguntas
-- [ ] **Q6 —** aprovar a Revisão 2? Ela também torna possível testar a chegada **sem simular localização**: basta criar o compromisso estando no destino, que foi o que você fez.
+- [x] **Q6 —** aprovar a Revisão 2? **Decisão: aprovada.** Ela também torna possível testar a chegada **sem simular localização**: basta criar o compromisso estando no destino, que foi o que você fez.

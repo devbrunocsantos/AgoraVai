@@ -89,7 +89,7 @@ compromisso.
 
 ---
 
-## Revisão 2 — Rascunho (2026-10-28), aguardando aprovação da spec
+## Revisão 2 — Aprovada em 2026-10-28 por Bruno C. Santos
 
 ### Fase 5 — O monitoramento começa no início do período
 - **Critérios cobertos:** LEMB-09.f (e mantém .a–.e)
