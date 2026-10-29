@@ -21,7 +21,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 |---|---|---|---|---|---|---|
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
 | 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
-| 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | rascunho (pesquisa/plano prévios) |
+| 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | esclarecida (pesquisa parcial e plano prévio a refazer) |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
 | 004 | Pomodoro: meta da sessão e progresso (DT-07, 08, 18) | Should | médio | M | — | rascunho (pesquisa/plano prévios) |
@@ -46,6 +46,8 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 2026-10-29 | Migrar a convenção `specs/` para `docs/sdd/` (padrão SDD+RPI) | Pedido do Bruno: um fluxo só, com as skills `/especificar` … `/validar` | Comandos `/spec`, `/research`, `/plan`, `/implement` removidos |
 | 2026-10-29 | Manter `capacidades/` e `arquitetura.md` como transitórios até concluir 001–004 | Os testes citam IDs de capacidade e o registro de DTs ainda é usado | Constituição §8; decidir o destino depois |
 | 2026-10-29 | Atualizar o AGP para 8.13.2 após verificação (opção A) | Build limpo e testes passando | Commit separado `f4be55c` |
+| 2026-10-29 | 003: saída perdida com o aparelho desligado toca logo após religar, se o evento não passou | P2: não falhar em silêncio | RF-002a, CA-1.5/1.6 |
+| 2026-10-29 | 003: aviso "Seus lembretes estão pausados" abre direto a tela da permissão | P5: um toque a menos | RF-004 |
 | 2026-10-29 | Reescrever as 4 specs no template novo; `implement.md` mesclado no `plano.md` | Padronizar os artefatos | CAs citam o ID antigo (`CA-1.4 (LEMB-09.f)`) |
 
 ## Riscos
@@ -59,5 +61,5 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 
 ## Próximos passos
 1. Rodar no aparelho A4 e R4 (001) e R4 e R5 (002) → `/validar 001` e `/validar 002`.
-2. `/esclarecer 003` (Q5 e o critério de chegada após reiniciar) → reconferir a pesquisa → `/planejar 003`.
+2. `/pesquisar 003` (refazer contra o código atual; considerar o stash `stash@{0}` de 2026-10-26, que tem um `BootReceiver` antigo) → revisão → `/planejar 003`.
 3. Especificar DT-21.
