@@ -1,7 +1,7 @@
 ---
 id: 003
 titulo: Reagendar após reiniciar ou atualizar
-status: esclarecida  # rascunho | esclarecida | pesquisada | planejada | em-implementacao | implementada | validada
+status: pesquisada  # rascunho | esclarecida | pesquisada | planejada | em-implementacao | implementada | validada
 criada_em: 2026-10-26
 atualizada_em: 2026-10-29
 responsavel: Bruno C. Santos
