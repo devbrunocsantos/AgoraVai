@@ -10,7 +10,7 @@ status: concluido  # rascunho | aprovado | em-implementacao | concluido
 
 > Aprovado em 2026-10-27 por Bruno C. Santos (com a Fase 4, DT-20, acrescentada na aprovação). Fase 5 (Revisão 2) aprovada em 2026-10-28.
 > Pré-requisito: spec 001 implementada (`CompromissoAlarmScheduler`, `calcularHorarios`).
-> Pendências de verificação manual: **B5**, **B6**, R4, R5 — a cobrir em `/validar 002`.
+> Pendências de verificação manual: R4 (CA-3.1) e R5 (CA-3.2) — a cobrir em `/validar 002`. B5 e B6 ✅.
 
 ## Visão geral
 
@@ -141,8 +141,8 @@ RF-002 (início do monitoramento) e RF-003, mantendo CA-1.1 a CA-3.2.
 - [x] `./gradlew testDebugUnitTest assembleDebug` — commit `355933f` (10/10)
 - [x] `JanelaChegadaTest`: horário de ativação = início do preparo (CA-1.4, regra)
 #### Verificação manual
-- [ ] **B5** — CA-1.4 (e CA-1.1, CA-1.2): no destino, criar o compromisso com o preparo começando em ~5 min e não sair do lugar → "Você chegou! 🏁" no início do preparo; "HORA DE SAIR" e atraso não tocam
-- [ ] **B6** — CA-1.3: igual ao B5, fechando o app à força (`adb shell am kill com.brunocsantos.agoravai` ou remover dos recentes) antes do preparo começar
+- [x] **B5** — CA-1.4 (e CA-1.1, CA-1.2) ✅ (aparelho real; resultado informado pelo Bruno em 2026-10-29): no destino, criar o compromisso com o preparo começando em ~5 min e não sair do lugar → "Você chegou! 🏁" no início do preparo; "HORA DE SAIR" e atraso não tocam
+- [x] **B6** — CA-1.3 ✅ (aparelho real; informado em 2026-10-29): igual ao B5, fechando o app à força (`adb shell am kill com.brunocsantos.agoravai` ou remover dos recentes) antes do preparo começar
 
 ---
 
@@ -190,7 +190,8 @@ RF-002 (início do monitoramento) e RF-003, mantendo CA-1.1 a CA-3.2.
 - **Incorporação nas capacidades** (commits `d3b5fe2`, `066e026`):
   - [x] Delta em `capacidades/lembretes.md` (LEMB-09), `compromissos.md` (COMP-08) e `automacoes.md` (AUTO-08), com status 🧪
   - [x] `arquitetura.md` (DT-01 e DT-20 🧪, §3.2, §5.3.1, histórico 1.4)
-  - [ ] Após B5, B6, R4, R5: trocar 🧪 por ✅ em LEMB-09/COMP-08 e riscar DT-01, DT-20
+  - [x] B5 e B6 registrados nas capacidades (2026-10-29)
+  - [ ] Após R4, R5: trocar 🧪 por ✅ em LEMB-09/COMP-08 e riscar DT-01, DT-20
 - **Follow-ups:**
   - Geofences de chegada não sobrevivem a reiniciar → spec 003 (basta reagendar via `CompromissoAlarmScheduler.agendar`; o plano da 003 precisa refletir isso).
   - `NotificationScheduler.createNotificationChannel` só na `MainActivity`: se um receiver notificar antes de o app ser aberto uma vez após a instalação, o canal não existe. Mover para o `AgoraVaiApplication`.

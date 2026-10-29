@@ -100,7 +100,7 @@ horário do evento.
 - **d.** Dado o app fechado (processo encerrado), quando entro no raio dentro do período, então a chegada é detectada da mesma forma.
 - **e.** Dado um destino sem coordenadas, quando salvo, então o compromisso é salvo normalmente, sem detecção de chegada (COMP-08).
 - **f.** Dado que estou no destino quando salvo o compromisso e continuo lá, quando o preparo começa, então recebo "Você chegou! 🏁", e "HORA DE SAIR" e "Você está atrasado!" não tocam. *(início do monitoramento: `JanelaChegadaTest`)*
-- 🧪 Implementado em [`deteccao-de-chegada`](../specs/002-deteccao-de-chegada/) (Revisão 2 em 2026-10-28). Em aparelho: **c** (entrada antes do período ignorada) verificado em 2026-10-28; **a**, **b**, **d** e **f** aguardam os testes B5 e B6.
+- 🧪 Implementado em [`deteccao-de-chegada`](../specs/002-deteccao-de-chegada/) (Revisão 2 em 2026-10-28). Em aparelho: **c** (entrada antes do período ignorada) verificado em 2026-10-28; **b**, **d** e **f** verificados pelos testes B5 e B6 (informados em 2026-10-29); **a** verificado no cenário "já no destino" (a entrada em movimento não foi testada, por falta de simulação de localização). Falta **e** (roteiro R4).
 
 ### LEMB-10 · Precisão e Doze — 🧪
 Os alarmes DEVEM ser exatos e disparar mesmo com o aparelho em Doze

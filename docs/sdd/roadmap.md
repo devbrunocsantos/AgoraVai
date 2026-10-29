@@ -20,7 +20,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | ID | Item | Prioridade | Valor | Esforço | Depende de | Status |
 |---|---|---|---|---|---|---|
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
-| 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — faltam B5, B6, R4, R5 |
+| 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
 | 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | rascunho (pesquisa/plano prévios) |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
@@ -36,7 +36,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 
 ## Em andamento
 - **001** — validação — rodar A4 (Android 14) e R4 (Android 12/12L) e então `/validar 001`.
-- **002** — validação — rodar B5 e B6 (no destino, sem simular localização), R4 e R5 e então `/validar 002`.
+- **002** — validação — B5 e B6 ✅; faltam R4 e R5 (ver risco DT-21) e então `/validar 002`.
 
 ## Decisões
 | Data | Decisão | Motivo | Impacto |
@@ -58,6 +58,6 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | AGP 8.13.2 sem commit e sem verificação pode quebrar o build | média | médio | Build limpo + testes 10/10 verificados; commit `f4be55c` | Bruno | fechado |
 
 ## Próximos passos
-1. Rodar no aparelho A4 e R4 (001) e B5, B6, R4 e R5 (002) → `/validar 001` e `/validar 002`.
+1. Rodar no aparelho A4 e R4 (001) e R4 e R5 (002) → `/validar 001` e `/validar 002`.
 2. `/esclarecer 003` (Q5 e o critério de chegada após reiniciar) → reconferir a pesquisa → `/planejar 003`.
 3. Especificar DT-21.

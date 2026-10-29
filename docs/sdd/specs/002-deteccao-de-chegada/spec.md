@@ -13,7 +13,7 @@ depende_de: "001"
 # Spec 002: Detecção de chegada
 
 > Aprovada em 2026-10-27 por Bruno C. Santos · implementada em 2026-10-27 · **Revisão 2** aprovada e implementada em 2026-10-28.
-> Verificação em aparelho: B1 ✅; aguardando **B5** (CA-1.4) e **B6** (CA-1.3). CA-1.1, CA-1.2 e CA-3.1/3.2 ainda sem roteiro concluído.
+> Verificação em aparelho: B1 ✅, **B5 ✅** (CA-1.4, CA-1.2; CA-1.1 no cenário "já no destino"), **B6 ✅** (CA-1.3) — informados em 2026-10-29. Faltam R4 (CA-3.1) e R5 (CA-3.2).
 > Migrada da convenção anterior (`specs/changes/2026-10-26-deteccao-de-chegada/`) em 2026-10-29.
 
 ## 1. Contexto e problema
