@@ -23,9 +23,11 @@ O botão "Salvar" DEVE ficar habilitado somente quando:
 título não vazio **E** meta inteira > 0 **E** ao menos um gatilho ligado **E**
 (repetição desligada **OU** ≥ 1 dia) **E** (local desligado **OU** local escolhido).
 
-### AUTO-03 · Escolher local — ✅
+### AUTO-03 · Escolher local — ⚠️ DT-23
 O sistema DEVE permitir escolher o local pelo Places Autocomplete (restrito ao
 Brasil) ou pela localização atual (endereço por geocodificação reversa).
+
+- ⚠️ Visto em aparelho (2026-10-29): depois da primeira vez, tocar em "Local" não abre mais a busca de endereço (por exemplo, para trocar a localização atual por outro local) (DT-23).
 
 ### AUTO-04 · Gatilho de horário — ✅
 ONDE o gatilho de horário está ligado, o sistema DEVE avaliar a automação

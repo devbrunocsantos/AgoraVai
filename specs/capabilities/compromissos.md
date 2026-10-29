@@ -97,12 +97,14 @@ etapas e itens (cascata) e cancelar alarmes e geofence.
 - **b.** Dado um compromisso excluído, quando passa o horário de saída + 10 min, então nenhum aviso de atraso aparece.
 - ✅ Cancelamento do aviso de atraso corrigido em [`lembrete-de-saida`](../changes/2026-10-26-lembrete-de-saida/); verificado em aparelho real em 2026-10-28 (teste A5: nada tocou).
 
-### COMP-12 · Lista — ✅
+### COMP-12 · Lista — ⚠️ DT-22
 O sistema DEVE listar os compromissos em ordem crescente de data/hora, com
 título, "dd/MM/yyyy às HH:mm" e dias de repetição (se houver). Ao expandir, DEVE
 mostrar tempo total de preparo, tempo de viagem estimado, etapas, itens e as
 ações mapa, editar e excluir.
 ENQUANTO não houver compromissos, o sistema DEVE mostrar "Tudo organizado por aqui! ✨".
+
+- ⚠️ Visto em aparelho (2026-10-29): ao expandir o último compromisso da lista, os botões editar e excluir ficam atrás do botão "+" e não dá para tocá-los (DT-22).
 
 ### COMP-13 · Repetição semanal — ⚠️ DT-04
 ONDE o usuário selecionou dias de repetição, o sistema DEVE, após cada

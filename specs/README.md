@@ -148,6 +148,14 @@ Requisitos hoje ⚠️ divergentes ou ⬜ planejados, em ordem de impacto. As co
 | [`2026-10-26-reagendar-apos-reiniciar`](changes/2026-10-26-reagendar-apos-reiniciar/) | DT-05 | aguardando aprovação |
 | [`2026-10-26-pomodoro-meta-e-progresso`](changes/2026-10-26-pomodoro-meta-e-progresso/) | DT-07, DT-08, DT-18 | aguardando aprovação |
 
+### Ajustes anotados em 2026-10-29 (testes em aparelho)
+
+| Ajuste | Tipo | Requisito | Causa provável |
+|---|---|---|---|
+| Botões editar/excluir ficam atrás do "+" ao abrir os detalhes | Bug | COMP-12 · DT-22 | Falta espaço no fim da lista para o FAB |
+| Pomodoro não deixa trocar o local depois de usar "localização atual" | Bug | AUTO-03 · DT-23 | A busca de endereço só abre uma vez por sessão (flag nunca é resetada) |
+| Deixar mais bonitos o "Agora Vai..." e a frase do topo | Melhoria visual | SIS-02 | — (precisa de spec com o visual desejado) |
+
 Backlog completo:
 
 | Mudança sugerida | Requisitos | DT |
@@ -157,6 +165,8 @@ Backlog completo:
 | Fechar o alarme de tela cheia ao confirmar a saída | LEMB-07 | DT-16 |
 | Tela cheia bloqueada no Android 14 sem como abrir o lembrete | LEMB-04 | DT-19 |
 | Endereço inexistente aceito com percurso de 0 min | COMP-05 | DT-21 |
+| Botões editar/excluir atrás do "+" | COMP-12 | DT-22 |
+| Busca de local do Pomodoro só abre uma vez | AUTO-03 | DT-23 |
 | Migrações reais do Room | Constituição P3 | DT-03 |
 | Reagendar após reiniciar o aparelho | LEMB-11 | DT-05 |
 | Reagendar compromissos recorrentes | COMP-13 | DT-04 |
