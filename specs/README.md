@@ -144,7 +144,7 @@ Requisitos hoje ⚠️ divergentes ou ⬜ planejados, em ordem de impacto. As co
 | Mudança | Cobre | Situação |
 |---|---|---|
 | [`2026-10-26-lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/) | DT-02, DT-06, DT-16, DT-17, DT-19 | implementada; verificados A1–A3, A5; faltam A4 e R4 |
-| [`2026-10-26-deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/) | DT-01, DT-20 | implementada com a Revisão 2; aguardando testes B5/B6 |
+| [`2026-10-26-deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/) | DT-01, DT-20 | implementada com a Revisão 2; B1, B5, B6 ✅; faltam LEMB-09.a (entrada real) e .e |
 | [`2026-10-26-reagendar-apos-reiniciar`](changes/2026-10-26-reagendar-apos-reiniciar/) | DT-05 | aguardando aprovação |
 | [`2026-10-26-pomodoro-meta-e-progresso`](changes/2026-10-26-pomodoro-meta-e-progresso/) | DT-07, DT-08, DT-18 | aguardando aprovação |
 

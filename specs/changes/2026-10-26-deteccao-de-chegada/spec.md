@@ -2,7 +2,7 @@
 
 - **Data:** 2026-10-26
 - **Autor:** Claude (a pedido de Bruno C. Santos)
-- **Status:** Implementada em 2026-10-27 · Aprovada em 2026-10-27 por Bruno C. Santos · **Revisão 2 aprovada e implementada em 2026-10-28**, aguardando os testes B5 e B6
+- **Status:** Implementada em 2026-10-27 · Aprovada em 2026-10-27 por Bruno C. Santos · **Revisão 2 aprovada e implementada em 2026-10-28**; B5 e B6 ✅ em 2026-10-29. Faltam LEMB-09.a (entrada real) e LEMB-09.e/COMP-08.a
 - **Capacidades afetadas:** `capabilities/lembretes.md`
 - **DTs relacionados:** DT-01, DT-20
 - **Depende de:** `2026-10-26-lembrete-de-saida` (usa o agendador para cancelar lembretes)

@@ -298,7 +298,7 @@ Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠
 
 | # | Severidade | Problema | Onde |
 |---|---|---|---|
-| DT-01 | **Alta** | 🧪 *Corrigido em [`deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/), aguardando verificação em aparelho.* `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. Além disso, os dois managers de geofence só são inicializados pela `MainActivity`, então receivers e workers em segundo plano não conseguem remover geofences (AUTO-08). | `MainActivity.onCreate`, managers de geofence |
+| ~~DT-01~~ | **Alta** | ✅ *Resolvido em [`deteccao-de-chegada`](changes/2026-10-26-deteccao-de-chegada/), verificado em aparelho em 2026-10-29 (B5, B6).* `CompromissoGeofenceManager.initialize()` nunca é chamado, então `addGeofenceChegada` retorna cedo e **a detecção de chegada (LEMB-09) nunca funciona**. Além disso, os dois managers de geofence só são inicializados pela `MainActivity`, então receivers e workers em segundo plano não conseguem remover geofences (AUTO-08). | `MainActivity.onCreate`, managers de geofence |
 | ~~DT-02~~ | **Alta** | ✅ *Resolvido em [`lembrete-de-saida`](changes/2026-10-26-lembrete-de-saida/), verificado em aparelho em 2026-10-28.* Chaves de extra divergentes: o ViewModel grava `"EXTRA_TITLE"`, `"EXTRA_MESSAGE"`, `"EXTRA_NOTIFICATION_ID"`, `"EXTRA_HAS_ACTION"`, `"EXTRA_ACTION_INTENT"`, `"EXTRA_ACTION_TITLE"`, mas o `AlarmReceiver` lê as constantes `"extra_title"`, `"extra_message"`… Resultado: o lembrete de saída sai com título/mensagem padrão, ID aleatório e **sem o botão "Já Saí"**. | `CompromissoViewModel.agendarAlarmeSaidaComAction`, `AlarmReceiver` |
 | DT-03 | **Alta** | `fallbackToDestructiveMigration` + `exportSchema=false`: qualquer mudança de schema **apaga todos os dados do usuário**. Os schemas em `app/schemas` (v3, v4) estão desatualizados (DB está na v10). | `AppDatabase` |
 | DT-04 | Alta | Repetição de compromissos (COMP-13) é só armazenada: os alarmes são únicos e não são reagendados para a próxima ocorrência. | `CompromissoViewModel.agendarAlarmes` |
@@ -354,3 +354,4 @@ Novas decisões são registradas aqui a partir da fase **Plan** (constituição 
 | 1.5 | 2026-10-28 | Resultados dos testes em aparelho: DT-02, DT-06 e DT-16 resolvidos; DT-21 adicionado. |
 | 1.6 | 2026-10-28 | Revisão 2 da chegada: alarme de ativação no início do preparo (§5.2, §5.3.1). |
 | 1.7 | 2026-10-29 | DT-22 e DT-23 adicionados (ajustes anotados nos testes em aparelho). |
+| 1.8 | 2026-10-29 | DT-01 resolvido (chegada verificada em aparelho). |

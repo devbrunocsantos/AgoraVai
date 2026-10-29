@@ -12,7 +12,7 @@
 | 2 — Regra do período | ✅ feito | ver `git log` ("chegada fase 2") | build ✅ · testes 9/9 ✅ |
 | 3 — Registro e receiver | ✅ feito | ver `git log` ("chegada fase 3") | build ✅ · testes 9/9 ✅ · manual R1–R4 ⏳ (aparelho) |
 | 4 — Coordenadas não vazam (DT-20) | ✅ feito | ver `git log` ("chegada fase 4") | build ✅ · testes 9/9 ✅ · manual R5 ⏳ (aparelho) |
-| 5 — Monitoramento no início do período (Revisão 2) | ✅ feito | `355933f` | build ✅ · testes 10/10 ✅ · manual B5, B6 ⏳ (aparelho) |
+| 5 — Monitoramento no início do período (Revisão 2) | ✅ feito | `355933f` | build ✅ · testes 10/10 ✅ · manual B5 ✅ B6 ✅ (aparelho real, 2026-10-29) |
 
 ## Desvios do plano
 - **Aprovação:** a Fase 4 (DT-20, critério COMP-08.a) foi acrescentada ao plano na aprovação, conforme proposto ao fim da mudança `lembrete-de-saida`.
@@ -24,12 +24,12 @@
 | Critério | Resultado | Evidência |
 |---|---|---|
 | LEMB-09.a / .c (regra do período) | ✅ | `JanelaChegadaTest` (dentro, antes do preparo, dia anterior, limites 8:30 e 12:00/12:01) |
-| LEMB-09.a | ⏳ não verificado: o teste B2 foi feito já dentro do raio (limitação fora de escopo) | `handleCompromissoChegada` grava a chegada e notifica dentro do período |
-| LEMB-09.b | ⏳ não verificado (idem B2) | `confirmarSaida` + `CompromissoAlarmScheduler.cancelar` na chegada |
-| LEMB-09.c | 🟨 parcial (aparelho real, 2026-10-28: teste B1) | Entrada antes do período foi ignorada ✅; a detecção posterior não foi verificada (ver B2) |
-| LEMB-09.d | ⏳ não verificado (B3 feito já dentro do raio, sem fechar à força) | `goAsync()` + managers inicializados no `AgoraVaiApplication` |
+| LEMB-09.a | ⏳ entrada real no raio (vindo de fora) ainda não testada. Mesmo caminho de código do B5 (entrada → receiver → chegada), mas depende do Android detectar a transição em movimento | `handleCompromissoChegada` grava a chegada e notifica dentro do período |
+| LEMB-09.b | ✅ (aparelho real, 2026-10-29: B5) | `confirmarSaida` + `CompromissoAlarmScheduler.cancelar` na chegada |
+| LEMB-09.c | ✅ (aparelho real: B1 em 2026-10-28 + B5 em 2026-10-29) | Antes do período não há nem geofence (Revisão 2); a detecção no período foi confirmada no B5 |
+| LEMB-09.d | ✅ (aparelho real, 2026-10-29: B6, app fechado) | `goAsync()` + managers inicializados no `AgoraVaiApplication` |
 | LEMB-09.e | ⏳ código inalterado, falta roteiro R4 | `addGeofenceChegada` continua ignorando coordenadas `0.0` |
-| LEMB-09.f | 🟨 regra ✅ (`JanelaChegadaTest`), comportamento aguarda o teste B5 | Alarme de ativação no início do preparo → geofence com `INITIAL_TRIGGER_ENTER` |
+| LEMB-09.f | ✅ (`JanelaChegadaTest` + aparelho real, 2026-10-29: B5) | Alarme de ativação no início do preparo → geofence com `INITIAL_TRIGGER_ENTER` |
 | COMP-08.a | ⏳ inconclusivo (B4): a Directions API aceitou o endereço inexistente com 0 min (DT-21) | `tempLatDestino/tempLngDestino` agora são locais a cada salvamento, iniciando em `0.0` |
 
 ## Saída das verificações
@@ -50,6 +50,11 @@ O usuário não tinha como simular localização no celular, então criou os com
 - **B1 ✅:** entrada antes do período ignorada.
 - **B2 ❌ / B3 ❌:** "HORA DE SAIR" tocou e "Você chegou!" não apareceu. **Causa:** ao salvar, a geofence é registrada com `INITIAL_TRIGGER_ENTER` e dispara a entrada na hora, mas fora do período (o salvamento exige que o preparo ainda não tenha começado), então é ignorada. Como o usuário não sai do raio, o Android não gera nova entrada. É a limitação listada como fora de escopo na spec. O comportamento bate com o código, mas o teste mostrou que o caso é real → **proposta de Revisão 2 na spec**.
 - **B4 ⚠️:** endereço inexistente foi aceito com 0 min de percurso. Novo **DT-21** (correspondência aproximada da Directions API + arredondamento para baixo).
+
+## Resultado dos testes em aparelho (aparelho real, 2026-10-29) — após a Revisão 2
+- **B5 ✅:** parado no destino, a chegada foi detectada no início do preparo; "HORA DE SAIR" e atraso não tocaram (LEMB-09.b, .f).
+- **B6 ✅:** igual, com o app fechado (LEMB-09.d).
+- Falta: **LEMB-09.a** (entrada vindo de fora durante o período; dá para verificar num compromisso real) e **LEMB-09.e** / **COMP-08.a** (destino sem coordenadas, bloqueado pelo DT-21).
 
 ## Pendências / follow-ups
 - Geofences de chegada **não sobrevivem a reiniciar o aparelho**: é a mudança `reagendar-apos-reiniciar`. Com a Revisão 2, basta reagendar via `CompromissoAlarmScheduler.agendar`, que já agenda a ativação da chegada. O plano daquela mudança precisa ser ajustado para isso.
