@@ -3,7 +3,7 @@ spec: docs/sdd/specs/003-reagendar-apos-reiniciar/spec.md
 pesquisa: docs/sdd/specs/003-reagendar-apos-reiniciar/pesquisa.md
 data: 2026-10-29
 commit_base: 0016aa3
-status: rascunho  # rascunho | aprovado | em-implementacao | concluido
+status: em-implementacao  # rascunho | aprovado | em-implementacao | concluido
 ---
 
 # Plano de implementação: Reagendar após reiniciar ou atualizar
@@ -138,8 +138,8 @@ fun classificarPosicao(distanciaMetros: Float?, precisaoMetros: Float?): Posicao
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug`
-- [ ] `ReagendamentoTest` com os casos:
+- [x] `./gradlew testDebugUnitTest assembleDebug` ✅ (30/30)
+- [x] `ReagendamentoTest` com os casos (20/20):
   - `LEMB-11a reinicio na vespera reagenda etapas saida atraso e ativacao` (CA-1.1)
   - `LEMB-11b etapas passadas descartadas saida e atraso mantidos` (CA-1.2)
   - `LEMB-11b etapa exatamente em agora e descartada`
@@ -159,7 +159,7 @@ fun classificarPosicao(distanciaMetros: Float?, precisaoMetros: Float?): Posicao
   - `LEMB-11 atraso depois do evento ainda futuro e mantido` (trajeto 5 min, atraso 10:05, agora 10:01)
   - `RNF-001 regra e deterministica para a mesma entrada`
   - `LEMB-11i classificar posicao` — dentro (150 m, ±20), fora (500 m, ±20), desconhecida (sem leitura; ±300)
-- [ ] `HorariosLembreteTest` e `JanelaChegadaTest` continuam verdes (o raio não mudou de valor)
+- [x] `HorariosLembreteTest` e `JanelaChegadaTest` continuam verdes (o raio não mudou de valor)
 
 > ⏸ Após a verificação automatizada desta fase, pausar para confirmação antes de seguir.
 

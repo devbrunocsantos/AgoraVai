@@ -1,5 +1,6 @@
 package com.brunocsantos.agoravai.services.geofence
 
+import com.brunocsantos.agoravai.notifications.RAIO_CHEGADA_METROS
 import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
@@ -16,8 +17,8 @@ import com.google.android.gms.location.LocationServices
 
 object CompromissoGeofenceManager {
 
-    // Raio de 200 metros para considerar que "Chegou"
-    private const val GEOFENCE_RADIUS_IN_METERS = 200f
+    // Raio que conta como chegada (LEMB-09), definido junto das regras de horário
+    private const val GEOFENCE_RADIUS_IN_METERS = RAIO_CHEGADA_METROS
     private lateinit var applicationContext: Context
 
     private val geofencePendingIntent: PendingIntent by lazy {
