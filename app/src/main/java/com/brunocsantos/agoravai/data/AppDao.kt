@@ -28,6 +28,11 @@ interface AppDao {
     @Query("SELECT * FROM compromissos WHERE id = :id")
     suspend fun getCompromissoComEtapasById(id: Long): CompromissoComEtapas?
 
+    // LEMB-11: usado pelo reagendamento após reiniciar ou atualizar (sem a UI)
+    @Transaction
+    @Query("SELECT * FROM compromissos WHERE isEnabled = 1")
+    suspend fun getCompromissosAtivosComEtapas(): List<CompromissoComEtapas>
+
     @Transaction
     @Query("SELECT * FROM compromissos ORDER BY dataHoraEvento ASC")
     fun getAllCompromissosComEtapas(): Flow<List<CompromissoComEtapas>>

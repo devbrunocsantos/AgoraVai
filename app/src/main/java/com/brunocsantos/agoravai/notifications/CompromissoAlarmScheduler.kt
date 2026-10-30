@@ -12,8 +12,11 @@ import com.brunocsantos.agoravai.services.NotificationActionReceiver
 
 /**
  * Agenda e cancela todos os lembretes de um compromisso (etapas, saída e atraso).
- * Os request codes seguem a convenção de architecture.md §5.2 e não podem mudar,
+ * Os request codes seguem a convenção de arquitetura.md §5.2 e não podem mudar,
  * senão os cancelamentos deixam de acertar alarmes já agendados.
+ *
+ * `agendar` (salvar e religar) agenda todos os horários, sem filtrar o passado.
+ * `reagendar` (reiniciar e atualizar) segue o plano de `planoDeReagendamento` (LEMB-11).
  */
 object CompromissoAlarmScheduler {
 
@@ -43,15 +46,8 @@ object CompromissoAlarmScheduler {
             etapas.map { it.duracaoMinutos }
         )
 
-        // O índice do alarme de etapa é contado de trás para frente, como sempre foi
-        etapas.forEachIndexed { index, etapa ->
-            NotificationScheduler.scheduleAlarm(
-                context,
-                horarios.inicioEtapas[index],
-                idAlarmeEtapa(compromisso.id, etapas.size - 1 - index),
-                "Próximo Preparativo: ${etapa.descricao}",
-                "Faltam ${etapa.duracaoMinutos} min."
-            )
+        etapas.indices.forEach { index ->
+            agendarEtapa(context, compromisso.id, etapas, index, horarios.inicioEtapas[index])
         }
 
         agendarSaida(context, compromisso, horarios.saida, itens)
@@ -63,6 +59,38 @@ object CompromissoAlarmScheduler {
         if (temCoordenadas && fimDaJanelaDeChegada(compromisso.dataHoraEvento) > System.currentTimeMillis()) {
             agendarExato(context, inicioMonitoramentoChegada(horarios), pendingAtivacaoChegada(context, compromisso.id))
         }
+    }
+
+    /**
+     * LEMB-11: cancela o que existir e agenda só o que o plano manda. Com plano vazio,
+     * apenas limpa sobras (mesmos request codes, RNF-001).
+     */
+    fun reagendar(
+        context: Context,
+        compromisso: Compromisso,
+        etapas: List<Etapa>,
+        itens: List<String>,
+        plano: Reagendamento
+    ) {
+        cancelar(context, compromisso.id, etapas.size)
+        plano.etapas.forEach { (index, horario) ->
+            agendarEtapa(context, compromisso.id, etapas, index, horario)
+        }
+        plano.saida?.let { agendarSaida(context, compromisso, it, itens) }
+        plano.atraso?.let { agendarExato(context, it, pendingVerificacaoAtraso(context, compromisso.id)) }
+        plano.ativacaoChegada?.let { agendarExato(context, it, pendingAtivacaoChegada(context, compromisso.id)) }
+    }
+
+    // O índice do alarme de etapa é contado de trás para frente, como sempre foi
+    private fun agendarEtapa(context: Context, compromissoId: Long, etapas: List<Etapa>, index: Int, horario: Long) {
+        val etapa = etapas[index]
+        NotificationScheduler.scheduleAlarm(
+            context,
+            horario,
+            idAlarmeEtapa(compromissoId, etapas.size - 1 - index),
+            "Próximo Preparativo: ${etapa.descricao}",
+            "Faltam ${etapa.duracaoMinutos} min."
+        )
     }
 
     fun cancelar(context: Context, compromissoId: Long, numEtapas: Int) {

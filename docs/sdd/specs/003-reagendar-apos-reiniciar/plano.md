@@ -233,8 +233,8 @@ class BootReceiver : BroadcastReceiver() {
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug`
-- [ ] Manifest mesclado (`app/build/intermediates/merged_manifests/debug/.../AndroidManifest.xml`) contém `RECEIVE_BOOT_COMPLETED` e o `BootReceiver` com as duas ações
+- [x] `./gradlew testDebugUnitTest assembleDebug` ✅ (30/30)
+- [x] Manifest mesclado (`app/build/intermediates/merged_manifests/debug/.../AndroidManifest.xml`) contém `RECEIVE_BOOT_COMPLETED` e o `BootReceiver` com as duas ações
 
 #### Verificação manual
 - [ ] M1 — CA-1.1, CA-1.3
