@@ -37,6 +37,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 ## Em andamento
 - **001** — validação — rodar A4 (Android 14) e R4 (Android 12/12L) e então `/validar 001`.
 - **002** — validação — B5 e B6 ✅; faltam R4 e R5 (ver risco DT-21) e então `/validar 002`.
+- **003** — validação — implementada (fases 1–5); rodar M1–M10 em aparelho e então `/validar 003`.
 
 ## Decisões
 | Data | Decisão | Motivo | Impacto |
@@ -46,7 +47,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 2026-10-29 | Migrar a convenção `specs/` para `docs/sdd/` (padrão SDD+RPI) | Pedido do Bruno: um fluxo só, com as skills `/especificar` … `/validar` | Comandos `/spec`, `/research`, `/plan`, `/implement` removidos |
 | 2026-10-29 | Manter `capacidades/` e `arquitetura.md` como transitórios até concluir 001–004 | Os testes citam IDs de capacidade e o registro de DTs ainda é usado | Constituição §8; decidir o destino depois |
 | 2026-10-29 | Atualizar o AGP para 8.13.2 após verificação (opção A) | Build limpo e testes passando | Commit separado `f4be55c` |
-| 2026-10-29 | 003: saída perdida com o aparelho desligado toca logo após religar, se o evento não passou | P2: não falhar em silêncio | RF-002a, CA-1.5/1.6 |
+| 2026-10-29 | 003: saída perdida com o aparelho desligado toca logo após religar, se o evento não passou | P2: não falhar em silêncio | RF-002a, CA-1.4/1.5 |
 | 2026-10-29 | 003: aviso "Seus lembretes estão pausados" abre direto a tela da permissão | P5: um toque a menos | RF-004 |
 | 2026-10-29 | Reescrever as 4 specs no template novo; `implement.md` mesclado no `plano.md` | Padronizar os artefatos | CAs citam o ID antigo (`CA-1.4 (LEMB-09.f)`) |
 
