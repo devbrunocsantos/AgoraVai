@@ -334,7 +334,7 @@ RF-004 (CA-3.1, CA-3.2) e RF-005 (CA-4.1, CA-4.2).
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug`
+- [x] `./gradlew testDebugUnitTest assembleDebug` ✅ (30/30)
 
 #### Verificação manual
 - [ ] M7 — CA-3.1, CA-3.2 (Android 12/12L) + contraprova sem compromisso futuro + instalação nunca aberta + saída perdida sem permissão toca na hora

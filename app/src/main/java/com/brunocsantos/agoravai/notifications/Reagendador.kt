@@ -1,14 +1,23 @@
 package com.brunocsantos.agoravai.notifications
 
 import android.Manifest
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.brunocsantos.agoravai.R
 import com.brunocsantos.agoravai.data.AppDatabase
 import com.brunocsantos.agoravai.data.CompromissoComEtapas
+import com.brunocsantos.agoravai.services.geofence.CompromissoGeofenceManager
+import com.brunocsantos.agoravai.services.geofence.GeofenceManager
 import com.brunocsantos.agoravai.services.geofence.RegistroChegada
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -39,12 +48,16 @@ object Reagendador {
         val agora = System.currentTimeMillis()
         val compromissos = dao.getCompromissosAtivosComEtapas()
 
+        // LEMB-11.e: sem alarme exato, só o que não depende de alarme é feito
+        val podeAgendarExato = CompromissoAlarmScheduler.podeAgendarExato(context)
+        var lembretesPausados = false
+
         // A localização é lida no máximo uma vez, e só se algum compromisso precisar
         var localizacaoLida = false
         var localizacao: Location? = null
 
         compromissos.forEach { c ->
-            val plano = planoDe(c, agora, reinicio)
+            var plano = planoDe(c, agora, reinicio)
             val itens = c.itensLembrete.map { it.nomeItem }
 
             // LEMB-11.i: saída perdida com destino no período → a chegada tem precedência
@@ -58,21 +71,63 @@ object Reagendador {
                         RegistroChegada.registrar(context, c)
                         return@forEach
                     }
-                    PosicaoChegada.FORA ->
-                        CompromissoAlarmScheduler.reagendar(context, c.compromisso, c.etapas, itens, plano)
+                    PosicaoChegada.FORA -> Unit
                     PosicaoChegada.DESCONHECIDA ->
-                        CompromissoAlarmScheduler.reagendar(
-                            context, c.compromisso, c.etapas, itens,
-                            plano.copy(saida = agora + ATRASO_SAIDA_SEM_LOCALIZACAO_MS)
-                        )
+                        // Sem alarme exato não dá para esperar: a saída é entregue na hora
+                        if (podeAgendarExato) plano = plano.copy(saida = agora + ATRASO_SAIDA_SEM_LOCALIZACAO_MS)
                 }
-            } else {
+            }
+
+            if (podeAgendarExato) {
                 CompromissoAlarmScheduler.reagendar(context, c.compromisso, c.etapas, itens, plano)
+            } else {
+                CompromissoAlarmScheduler.cancelar(context, c.compromisso.id, c.etapas.size)
+                // A detecção de chegada não depende de alarme: é ativada direto (LEMB-11, RF-003)
+                if (plano.ativacaoChegada != null) {
+                    CompromissoGeofenceManager.addGeofenceChegada(c.compromisso, c.etapas)
+                }
+                if (plano.saidaPerdida) {
+                    CompromissoAlarmScheduler.dispararSaidaAgora(context, c.compromisso, itens)
+                }
+                // Lembretes futuros que ficaram sem agendar geram o aviso
+                if (plano.etapas.isNotEmpty() || plano.atraso != null || (plano.saida != null && !plano.saidaPerdida)) {
+                    lembretesPausados = true
+                }
             }
         }
 
+        if (lembretesPausados) mostrarAvisoLembretesPausados(context)
+
+        // AUTO-05: as geofences das automações ativas também somem ao reiniciar
+        dao.getActiveAutomationSettings().forEach { GeofenceManager.addOrUpdateGeofence(it) }
+
         // RNF-002: tempo total do reagendamento
         Log.d(TAG, "fim n=${compromissos.size} em ${System.currentTimeMillis() - inicio}ms")
+    }
+
+    // LEMB-11.e: só ocorre no Android 12+, pois abaixo disso podeAgendarExato é sempre true
+    private fun mostrarAvisoLembretesPausados(context: Context) {
+        val intent = Intent(
+            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+            Uri.parse("package:${context.packageName}")
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val pending = PendingIntent.getActivity(
+            context,
+            CompromissoAlarmScheduler.ID_NOTIFICACAO_LEMBRETES_PAUSADOS,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Seus lembretes estão pausados")
+            .setContentText(MENSAGEM_PERMISSAO_ALARME)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(MENSAGEM_PERMISSAO_ALARME))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pending)
+            .setAutoCancel(true)
+            .build()
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(CompromissoAlarmScheduler.ID_NOTIFICACAO_LEMBRETES_PAUSADOS, notification)
     }
 
     private fun planoDe(c: CompromissoComEtapas, agora: Long, reinicio: Boolean): Reagendamento {

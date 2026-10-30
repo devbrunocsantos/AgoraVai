@@ -10,6 +10,9 @@ import com.brunocsantos.agoravai.data.Compromisso
 import com.brunocsantos.agoravai.data.Etapa
 import com.brunocsantos.agoravai.services.NotificationActionReceiver
 
+// LEMB-10 / LEMB-11.e: mostrado quando o app não pode agendar alarmes exatos
+const val MENSAGEM_PERMISSAO_ALARME = "Permita “Alarmes e lembretes” para o Agora Vai avisar na hora certa."
+
 /**
  * Agenda e cancela todos os lembretes de um compromisso (etapas, saída e atraso).
  * Os request codes seguem a convenção de arquitetura.md §5.2 e não podem mudar,
@@ -29,6 +32,10 @@ object CompromissoAlarmScheduler {
     fun idAlarmeSaida(compromissoId: Long) = (compromissoId.toInt() * 100) + 99
     fun idAlarmeAtivacaoChegada(compromissoId: Long) = (compromissoId.toInt() * 100) + 97
     private fun requestCodeConfirmarSaida(compromissoId: Long) = compromissoId.toInt()
+
+    // LEMB-11.e: notificação global (não pertence a um compromisso), fora da faixa id*100+x
+    const val ID_NOTIFICACAO_LEMBRETES_PAUSADOS = Int.MAX_VALUE - 1
+
     private fun requestCodeVerificacaoAtraso(compromissoId: Long) = compromissoId.toInt() + 9999
 
     fun podeAgendarExato(context: Context): Boolean {
@@ -108,7 +115,22 @@ object CompromissoAlarmScheduler {
         alarmManager.cancel(pendingVerificacaoAtraso(context, compromissoId))
     }
 
+    // LEMB-11.e: sem alarme exato, a saída perdida é entregue na hora, sem passar pelo AlarmManager
+    fun dispararSaidaAgora(context: Context, compromisso: Compromisso, itens: List<String>) {
+        context.sendBroadcast(intentSaida(context, compromisso, itens))
+    }
+
     private fun agendarSaida(context: Context, compromisso: Compromisso, horario: Long, itens: List<String>) {
+        val pending = PendingIntent.getBroadcast(
+            context,
+            idAlarmeSaida(compromisso.id),
+            intentSaida(context, compromisso, itens),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        agendarExato(context, horario, pending)
+    }
+
+    private fun intentSaida(context: Context, compromisso: Compromisso, itens: List<String>): Intent {
         val idSaida = idAlarmeSaida(compromisso.id)
 
         val confirmIntent = Intent(context, NotificationActionReceiver::class.java).apply {
@@ -125,7 +147,7 @@ object CompromissoAlarmScheduler {
 
         val mensagem = if (itens.isNotEmpty()) "Saia agora! Não esqueça seus itens." else "Saia agora para chegar a tempo!"
 
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
+        return Intent(context, AlarmReceiver::class.java).apply {
             putExtra(EXTRA_TITLE, "HORA DE SAIR: ${compromisso.titulo}")
             putExtra(EXTRA_MESSAGE, mensagem)
             putExtra(EXTRA_NOTIFICATION_ID, idSaida)
@@ -136,13 +158,6 @@ object CompromissoAlarmScheduler {
             putStringArrayListExtra(EXTRA_ITEMS, ArrayList(itens))
             putExtra(EXTRA_COMPROMISSO_ID, compromisso.id)
         }
-        val pending = PendingIntent.getBroadcast(
-            context,
-            idSaida,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        agendarExato(context, horario, pending)
     }
 
     // Mesmo Intent (componente + ação) e request code para agendar e cancelar, senão o cancelamento não casa

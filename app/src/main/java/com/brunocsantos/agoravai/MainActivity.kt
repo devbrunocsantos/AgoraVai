@@ -39,7 +39,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.brunocsantos.agoravai.billing.BillingClientManager
 import com.brunocsantos.agoravai.data.AppDatabase
-import com.brunocsantos.agoravai.notifications.NotificationScheduler
 import com.brunocsantos.agoravai.services.AppForegroundState
 import com.brunocsantos.agoravai.services.PomodoroTimerState
 import com.brunocsantos.agoravai.ui.ViewModelFactory
@@ -117,7 +116,6 @@ class MainActivity : ComponentActivity() {
         })
         billingClientManager = BillingClientManager(this)
         initializePlacesApi()
-        NotificationScheduler.createNotificationChannel(this)
         SettingsManager.initialize(this)
         PomodoroTimerState.resetToDefaults(this)
         askNotificationPermission()

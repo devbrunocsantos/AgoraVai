@@ -1,5 +1,6 @@
 package com.brunocsantos.agoravai.ui.compromissos
 
+import com.brunocsantos.agoravai.notifications.MENSAGEM_PERMISSAO_ALARME
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -40,9 +41,6 @@ import java.util.TimeZone
 import kotlin.random.Random
 
 enum class AddressField { ORIGIN, DESTINATION }
-
-// LEMB-10: mostrado quando o app não pode agendar alarmes exatos
-const val MENSAGEM_PERMISSAO_ALARME = "Permita “Alarmes e lembretes” para o Agora Vai avisar na hora certa."
 
 data class EtapaState(
     val id: Int = System.currentTimeMillis().toInt() + Random.nextInt(),
