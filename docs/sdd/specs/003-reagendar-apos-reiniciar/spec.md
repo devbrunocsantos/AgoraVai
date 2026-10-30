@@ -1,7 +1,7 @@
 ---
 id: 003
 titulo: Reagendar após reiniciar ou atualizar
-status: pesquisada  # rascunho | esclarecida | pesquisada | planejada | em-implementacao | implementada | validada
+status: planejada  # rascunho | esclarecida | pesquisada | planejada | em-implementacao | implementada | validada
 criada_em: 2026-10-26
 atualizada_em: 2026-10-29
 responsavel: Bruno C. Santos
@@ -57,7 +57,7 @@ Como **pessoa com compromissos cadastrados**, quero **que os lembretes continuem
 - **CA-1.4 (LEMB-11.f)** — **Dado** um compromisso às 10:00 com saída às 9:15, saída não confirmada e o usuário fora do destino, **quando** o aparelho fica desligado das 9:00 às 9:20, **então** "HORA DE SAIR" toca em até 1 min após o primeiro desbloqueio depois do reinício, e o aviso de atraso continua agendado para 9:25.
 - **CA-1.5 (LEMB-11.g)** — **Dado** um compromisso às 10:00 com saída às 9:15, **quando** o aparelho fica desligado das 9:00 às 10:05, **então** nem as etapas, nem "HORA DE SAIR", nem "Você está atrasado!" tocam.
 - **CA-1.6 (LEMB-11.h)** — **Dado** um compromisso às 10:00 com preparo às 8:30 e destino localizado, **quando** reinicio o aparelho às 8:00, não abro o app e entro no raio do destino às 9:40, **então** recebo "Você chegou! 🏁" e os lembretes pendentes não tocam.
-- **CA-1.7 (LEMB-11.i)** — **Dado** um compromisso às 10:00 com saída às 9:15 e que estou no destino, **quando** o aparelho fica desligado das 9:00 às 9:20 e eu não saio do lugar, **então** recebo "Você chegou! 🏁" em até 1 min após o primeiro desbloqueio depois do reinício, e "HORA DE SAIR" e "Você está atrasado!" não tocam.
+- **CA-1.7 (LEMB-11.i)** — **Dado** um compromisso às 10:00 com saída às 9:15 e que estou no destino, **quando** o aparelho fica desligado das 9:00 às 9:20 e eu não saio do lugar, **então** recebo "Você chegou! 🏁" em até 1 min após o primeiro desbloqueio depois do reinício, e "HORA DE SAIR" e "Você está atrasado!" não tocam. *Limite aceito: se a localização não puder ser obtida no reinício e o sistema demorar a reportar a presença no destino, "HORA DE SAIR" pode aparecer e é fechado assim que a chegada for detectada (§9).*
 
 ### História 2 — Atualizar o app corrige os lembretes antigos (Prioridade: P1)
 
@@ -109,6 +109,8 @@ Como **pessoa que usa automação de foco por local**, quero **que ela continue 
 - Reiniciar no meio do período de chegada → a detecção recomeça na hora (RF-003).
 - Saída perdida com o aparelho desligado → lembrete de saída imediato, se o evento ainda não começou e o usuário não está no destino (RF-002a, RF-003).
 - Aviso de atraso que cai depois do evento (trajeto < 10 min) → dispara normalmente, como sem reinício (RF-002).
+- Localização indisponível no reinício (sem permissão, sem sinal, leitura lenta) com saída perdida e destino localizado → o lembrete de saída é adiado em até 45 s para dar tempo de a chegada ser detectada; se não for, ele toca (e é fechado se a chegada vier depois). Decisão de 2026-10-29.
+- Sem permissão de alarme exato → além do aviso (RF-004), a detecção de chegada é ativada e a saída perdida é entregue na hora; os demais lembretes ficam pausados.
 
 ## 10. Critérios de sucesso
 
