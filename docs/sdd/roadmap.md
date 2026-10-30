@@ -21,7 +21,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 |---|---|---|---|---|---|---|
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
 | 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
-| 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | planejada — plano aguardando aprovação |
+| 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | implementada — roteiros M1–M10 em aparelho → `/validar 003` |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
 | 004 | Pomodoro: meta da sessão e progresso (DT-07, 08, 18) | Should | médio | M | — | rascunho (pesquisa/plano prévios) |
@@ -61,5 +61,5 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 
 ## Próximos passos
 1. Rodar no aparelho A4 e R4 (001) e R4 e R5 (002) → `/validar 001` e `/validar 002`.
-2. Aprovar `specs/003-reagendar-apos-reiniciar/plano.md` → `/implementar 003`.
+2. Rodar M1–M10 (003) em aparelho → `/validar 003`.
 3. Especificar DT-21.

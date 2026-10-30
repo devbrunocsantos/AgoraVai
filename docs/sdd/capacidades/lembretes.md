@@ -88,8 +88,10 @@ o início do preparo e 2 horas depois do horário do evento, o sistema DEVE:
 3. notificar "Você chegou! 🏁" com "Destino alcançado: <título>";
 4. parar de monitorar o destino.
 
-SE o usuário já estiver dentro do raio quando o período de chegada começar,
-ENTÃO o sistema DEVE considerar a chegada nesse momento. O monitoramento DEVE
+SE o usuário já estiver dentro do raio quando o período de chegada começar, ou
+quando a detecção for ativada ou reativada durante o período (religar o
+compromisso, reiniciar o aparelho — LEMB-11), ENTÃO o sistema DEVE considerar a
+chegada nesse momento. O monitoramento DEVE
 começar no início do período, e não antes. Entradas no raio fora desse período
 DEVEM ser ignoradas. O monitoramento DEVE terminar sozinho 2 horas depois do
 horário do evento.
@@ -114,6 +116,38 @@ DEVE salvar nem reativar. Ao salvar, a mensagem DEVE oferecer a ação
 - **b.** Dada a permissão negada, quando religo um compromisso desativado, então vejo a mensagem e o switch continua desligado.
 - 🧪 Corrigido em [`lembrete-de-saida`](../specs/001-lembrete-de-saida/); aguarda o roteiro R4, que exige Android 12/12L (no 13+ a permissão é concedida automaticamente).
 
-### LEMB-11 · Sobreviver a reinicialização — ⬜ DT-05
-QUANDO o aparelho reiniciar ou a hora do sistema mudar, o sistema DEVE
-reagendar alarmes e geofences de todos os compromissos ativos e futuros.
+### LEMB-11 · Sobreviver a reinicialização — 🧪
+QUANDO o aparelho terminar de reiniciar ou o app for atualizado, o sistema DEVE,
+sem precisar que o app seja aberto, reagendar os lembretes (etapas, saída e
+atraso) que ainda estão no futuro, para todos os compromissos ativos. Lembretes de
+etapa e de atraso cujo horário passou com o aparelho desligado NÃO DEVEM
+disparar; atrasos ainda no futuro são mantidos mesmo depois do evento.
+
+SE o horário de saída passou com o aparelho desligado, a saída não foi
+confirmada, a chegada não foi considerada no reinício e o evento ainda não
+chegou, ENTÃO o lembrete de saída DEVE disparar logo após o reinício. Depois do
+horário do evento, etapas e saída perdidas não disparam.
+
+No mesmo momento, o sistema DEVE reativar a detecção de chegada (LEMB-09) dos
+compromissos cujo período não terminou; quem já está no destino tem a chegada
+considerada antes de qualquer saída perdida.
+
+QUANDO o reagendamento ocorrer e houver compromisso ativo com lembrete futuro, SE
+o app não puder agendar alarmes exatos, ENTÃO o sistema DEVE notificar "Seus
+lembretes estão pausados" com "Permita “Alarmes e lembretes” para o Agora Vai
+avisar na hora certa.", e tocar na notificação DEVE abrir a tela da permissão
+"Alarmes e lembretes".
+
+A mudança da hora do sistema não exige ação: os horários são instantes absolutos.
+
+- **a.** Compromisso amanhã às 10:00 (saída 9:15); reinício hoje sem abrir o app → a saída toca às 9:15. *(regra: `ReagendamentoTest`)*
+- **b.** Etapas às 8:00 e 8:20, saída 9:15; desligado das 7:55 às 8:30 → as etapas não tocam; saída e atraso seguem. *(regra: `ReagendamentoTest`)*
+- **c.** Compromisso desativado → nada é agendado. *(regra: `ReagendamentoTest`)*
+- **d.** Atualizar o app com lembretes agendados → passam a aparecer com título, mensagem e "Já Saí" (tipo PADRAO).
+- **e.** Sem alarme exato e com compromisso futuro, ao reiniciar → "Seus lembretes estão pausados"; o toque abre "Alarmes e lembretes". *(só no Android 12/12L)*
+- **f.** Saída 9:15 não confirmada, fora do destino, desligado das 9:00 às 9:20 → "HORA DE SAIR" em até 1 min após o desbloqueio; atraso às 9:25. *(regra: `ReagendamentoTest`)*
+- **g.** Desligado das 9:00 às 10:05 → nem etapas, nem saída, nem atraso. *(regra: `ReagendamentoTest`)*
+- **h.** Reinício às 8:00, preparo às 8:30, entrada no raio às 9:40 → "Você chegou! 🏁". *(regra: `ReagendamentoTest`)*
+- **i.** No destino, desligado das 9:00 às 9:20 → "Você chegou! 🏁" em até 1 min; saída e atraso não tocam. *Limite aceito: sem localização e com o sistema lento para reportar a presença, "HORA DE SAIR" pode aparecer e é fechado quando a chegada for detectada.* *(regra: `ReagendamentoTest`)*
+- **j.** Como **e**, ao atualizar o app → mesmo aviso.
+- 🧪 Implementado em [`reagendar-apos-reiniciar`](../specs/003-reagendar-apos-reiniciar/); aguarda os roteiros M1–M10 em aparelho.

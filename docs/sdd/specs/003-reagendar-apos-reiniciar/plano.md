@@ -3,7 +3,7 @@ spec: docs/sdd/specs/003-reagendar-apos-reiniciar/spec.md
 pesquisa: docs/sdd/specs/003-reagendar-apos-reiniciar/pesquisa.md
 data: 2026-10-29
 commit_base: 0016aa3
-status: em-implementacao  # rascunho | aprovado | em-implementacao | concluido
+status: concluido  # rascunho | aprovado | em-implementacao | concluido
 ---
 
 # Plano de implementação: Reagendar após reiniciar ou atualizar
@@ -354,7 +354,7 @@ RF-004 (CA-3.1, CA-3.2) e RF-005 (CA-4.1, CA-4.2).
 
 ### Critérios de sucesso
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug` (regressão final)
+- [x] `./gradlew testDebugUnitTest assembleDebug` (regressão final) ✅ (30/30)
 
 ---
 
@@ -417,6 +417,18 @@ RF-004 (CA-3.1, CA-3.2) e RF-005 (CA-4.1, CA-4.2).
 - Room: uma consulta nova, sem versão nova. Manifest: permissão + receiver.
 - Na primeira atualização com esta versão, os lembretes futuros já agendados são reagendados com os extras atuais.
 - **Rollback:** reverter os commits das fases (o receiver sai do manifest junto).
+
+## Registro da implementação
+
+- **Código:** 2026-10-29 — fases 1 `ac66a8c`, 2 `430acb1`, 3 `d82636a`, 4 `c19bb79`; correções da revisão de código `fix` seguinte; fase 5 (documentação) no commit de encerramento.
+- **Saída das verificações:** `./gradlew testDebugUnitTest assembleDebug` → BUILD SUCCESSFUL; `HorariosLembreteTest` 4/4, `JanelaChegadaTest` 6/6, `ReagendamentoTest` 20/20.
+- **Execução:** a pedido do Bruno (opção A), as fases 2–4 foram implementadas em sequência; todos os roteiros M1–M10 (e o B5 repetido) ficam para uma rodada única em aparelho, antes do `/validar 003`.
+- **Revisão de código (`revisor-de-codigo`):** sem bloqueantes; contratos (P6) preservados. Corrigido: falha num compromisso ou na leitura de localização interrompia o reagendamento dos demais e das automações (agora isolado por compromisso; `lerLocalizacao` trata qualquer exceção e sempre cancela o token); leitura única do relógio; ordem de imports.
+- **Pendências levantadas pela revisão (para decisão do Bruno):**
+  - Sem alarme exato, a ativação direta da chegada antes do período não detecta quem já está no destino quando o preparo começa (limite já registrado em "Decisões"). Alternativa: agendar a ativação com alarme **inexato** (`setAndAllowWhileIdle`, que não exige permissão).
+  - Incluir `android.intent.action.QUICKBOOT_POWERON` (alguns fabricantes antigos usam em vez de `BOOT_COMPLETED`).
+  - O `Reagendador` (precedência e caminho sem permissão) só é verificável em aparelho (M5, M7): sem Robolectric (P8).
+- **Desvios do plano:** nenhum além das correções acima (todas dentro do escopo).
 
 ## Referências
 

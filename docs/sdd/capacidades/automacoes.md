@@ -32,12 +32,15 @@ ONDE o gatilho de horário está ligado, o sistema DEVE avaliar a automação
 diariamente por volta de HH:MM. O WorkManager é periódico de 24 h e pode
 atrasar alguns minutos.
 
-### AUTO-05 · Gatilho de local — ⚠️ DT-05
+### AUTO-05 · Gatilho de local — 🧪
 ONDE o gatilho de local está ligado, o sistema DEVE monitorar um raio de 100 m
 em volta do local e registrar se o usuário está dentro ou fora. QUANDO o usuário
-entra no raio, o sistema DEVE avaliar a automação.
+entra no raio, o sistema DEVE avaliar a automação. O monitoramento DEVE continuar
+após reiniciar o aparelho ou atualizar o app, sem precisar abrir o app.
 
-- Hoje: depois de reiniciar o aparelho, o monitoramento só volta quando o usuário edita ou alterna alguma automação.
+- **a.** Automação com local ativa; reinício e entrada no raio sem abrir o app → "Hora de Focar!".
+- **b.** Igual, ao atualizar o app → "Hora de Focar!".
+- 🧪 Implementado em [`reagendar-apos-reiniciar`](../specs/003-reagendar-apos-reiniciar/); aguarda o roteiro M8.
 
 ### AUTO-06 · Condições para sugerir — ✅
 Ao avaliar uma automação, o sistema DEVE sugerir a sessão somente se:

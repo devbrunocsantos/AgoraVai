@@ -5,7 +5,7 @@
 | Projeto | Agora Vai (`com.brunocsantos.agoravai`) |
 | Plataforma | Android nativo (Kotlin + Jetpack Compose) |
 | Versão do app | 1.5 (`versionCode 6`) |
-| Versão do documento | 1.7 — 2026-10-29 |
+| Versão do documento | 1.8 — 2026-10-29 |
 | Autor | Bruno C. Santos |
 | Status | *As-is*: descreve o design técnico como ele está hoje no código |
 
@@ -108,10 +108,10 @@ infraestrutura (`object`). Estado reativo via `StateFlow`/`SharedFlow`.
 |---|---|
 | `data` | Entidades Room, `AppDao`, `AppDatabase` (singleton), `Converters` |
 | `network` | Retrofit + modelos da Directions API |
-| `notifications` | Canal de notificação, `CompromissoAlarmScheduler` (agenda e cancela todos os lembretes de um compromisso), `HorariosLembrete` (cálculo puro dos horários), `NotificationScheduler` (AlarmManager), `AlarmReceiver` e as constantes `EXTRA_*` |
+| `notifications` | Canal de notificação, `CompromissoAlarmScheduler` (agenda, reagenda e cancela todos os lembretes de um compromisso), `HorariosLembrete` (cálculo puro dos horários, do período de chegada e do plano de reagendamento), `NotificationScheduler` (AlarmManager), `AlarmReceiver`, `BootReceiver` + `Reagendador` (recriam lembretes, chegada e geofences de automação após reiniciar ou atualizar, LEMB-11) e as constantes `EXTRA_*` |
 | `services` | `PomodoroService`, `PomodoroScheduler` (WorkManager), estados globais (`PomodoroTimerState`, `FocusSessionState`, `PomodoroCompletionState`, `AppForegroundState`), `NotificationActionReceiver` |
-| *(raiz)* | `AgoraVaiApplication` inicializa os managers de geofence para que funcionem em qualquer processo (receivers, workers); `MainActivity` |
-| `services/geofence` | `GeofenceManager` (automações), `CompromissoGeofenceManager` (chegada), `GeofenceBroadcastReceiver` |
+| *(raiz)* | `AgoraVaiApplication` inicializa os managers de geofence e cria o canal de notificação, para que funcionem em qualquer processo (receivers, workers), mesmo antes de o app ser aberto; `MainActivity` |
+| `services/geofence` | `GeofenceManager` (automações), `CompromissoGeofenceManager` (chegada), `RegistroChegada` (efeitos da chegada, usado pela geofence e pelo reagendamento), `GeofenceBroadcastReceiver` |
 | `workers` | `PomodoroWorker` (avalia condições de uma automação) |
 | `billing` | `BillingClientManager` (bypass), `SubscriptionManager` (não usado) |
 | `ui/*` | Telas Compose, ViewModels, `ViewModelFactory`, tema |
@@ -213,6 +213,11 @@ percorrendo a lista ao contrário, subtraindo a duração de cada uma.
 | Alarme de verificação de atraso | `compromissoId + 9999` |
 | Notificação de atraso | `compromissoId*100 + 98` |
 | Alarme de ativação da chegada (início do preparo) | `compromissoId*100 + 97` (ação `ATIVAR_CHEGADA`) |
+| Notificação "Seus lembretes estão pausados" (global) | `Int.MAX_VALUE - 1` (`CompromissoAlarmScheduler.ID_NOTIFICACAO_LEMBRETES_PAUSADOS`) |
+
+Raio da chegada: `RAIO_CHEGADA_METROS = 200f` (`HorariosLembrete.kt`), usado pela geofence e pela decisão de chegada no reagendamento.
+
+**Reagendamento (LEMB-11).** `BootReceiver` (`BOOT_COMPLETED` → reinício; `MY_PACKAGE_REPLACED` → atualização) chama `Reagendador.reagendarTudo`, que aplica `planoDeReagendamento` a cada compromisso ativo e usa `CompromissoAlarmScheduler.reagendar` (cancela e agenda só o plano, com os mesmos IDs). Saída perdida com destino no período: uma leitura de localização (até 4 s) decide entre registrar a chegada, tocar a saída na hora ou adiá-la 45 s. Sem alarme exato: aviso, chegada ativada direto e saída perdida via `sendBroadcast`. Salvar e religar continuam usando `agendar`, sem filtro de passado.
 | Notificação de chegada | `compromissoId*100 + 999` |
 | Geofence de chegada | `"compromisso_chegada_<id>"` |
 | Geofence de automação | `"<automationId>"` (só dígitos) |
@@ -281,7 +286,7 @@ que as desliga em ordem de prioridade. Deep link simples via extra
 `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `ACCESS_BACKGROUND_LOCATION`,
 `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_DATA_SYNC`,
 `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `USE_FULL_SCREEN_INTENT`, `WAKE_LOCK`,
-`SYSTEM_ALERT_WINDOW`.
+`RECEIVE_BOOT_COMPLETED` (LEMB-11), `SYSTEM_ALERT_WINDOW`.
 
 ---
 
@@ -303,7 +308,7 @@ Itens encontrados na leitura do código. Cada DT está ligado a um requisito ⚠
 | ~~DT-02~~ | **Alta** | ✅ *Resolvido em [`lembrete-de-saida`](specs/001-lembrete-de-saida/), verificado em aparelho em 2026-10-28.* Chaves de extra divergentes: o ViewModel grava `"EXTRA_TITLE"`, `"EXTRA_MESSAGE"`, `"EXTRA_NOTIFICATION_ID"`, `"EXTRA_HAS_ACTION"`, `"EXTRA_ACTION_INTENT"`, `"EXTRA_ACTION_TITLE"`, mas o `AlarmReceiver` lê as constantes `"extra_title"`, `"extra_message"`… Resultado: o lembrete de saída sai com título/mensagem padrão, ID aleatório e **sem o botão "Já Saí"**. | `CompromissoViewModel.agendarAlarmeSaidaComAction`, `AlarmReceiver` |
 | DT-03 | **Alta** | `fallbackToDestructiveMigration` + `exportSchema=false`: qualquer mudança de schema **apaga todos os dados do usuário**. Os schemas em `app/schemas` (v3, v4) estão desatualizados (DB está na v10). | `AppDatabase` |
 | DT-04 | Alta | Repetição de compromissos (COMP-13) é só armazenada: os alarmes são únicos e não são reagendados para a próxima ocorrência. | `CompromissoViewModel.agendarAlarmes` |
-| DT-05 | Alta | Não existe receiver de `BOOT_COMPLETED`/`TIME_SET`: alarmes e geofences somem após reiniciar o aparelho. | `AndroidManifest.xml` |
+| DT-05 | Alta | 🧪 *Corrigido em [`reagendar-apos-reiniciar`](specs/003-reagendar-apos-reiniciar/), aguardando verificação em aparelho.* Não existe receiver de `BOOT_COMPLETED`/`TIME_SET`: alarmes e geofences somem após reiniciar o aparelho. | `AndroidManifest.xml` |
 | ~~DT-06~~ | Média | ✅ *Resolvido em [`lembrete-de-saida`](specs/001-lembrete-de-saida/), verificado em aparelho em 2026-10-28.* Cancelamento do alarme de atraso usa um `Intent` sem `action`, que não casa com o `PendingIntent` original — o alarme CHECK_LATE não é cancelado ao excluir/desativar (mitigado porque ele checa `confirmouSaida`, mas dispara para compromissos excluídos se o ID for reaproveitado). `CONFIRM_EXIT` tenta cancelar o ID `*100+98`, que nunca foi agendado. | `cancelarTodosAlarmes`, `NotificationActionReceiver` |
 | DT-07 | Média | `PomodoroScheduler.cancelAll` chama `WorkManager.cancelAllWork()`, cancelando **qualquer** trabalho do app, não só automações. | `PomodoroScheduler` |
 | DT-08 | Média | Gravação de sessões de foco depende do `PomodoroViewModel` estar vivo para coletar o `SharedFlow`; com o app fechado, focos concluídos não são contados. | `FocusSessionState`, `PomodoroViewModel` |
@@ -353,3 +358,4 @@ Novas decisões são registradas aqui a partir da fase **Plan** (constituição 
 | 1.5 | 2026-10-28 | Resultados dos testes em aparelho: DT-02, DT-06 e DT-16 resolvidos; DT-21 adicionado. |
 | 1.6 | 2026-10-28 | Revisão 2 da chegada: alarme de ativação no início do preparo (§5.2, §5.3.1). |
 | 1.7 | 2026-10-29 | Migrado de `specs/architecture.md` para `docs/sdd/arquitetura.md` (padrão SDD+RPI); mudanças renumeradas: `lembrete-de-saida` → 001, `deteccao-de-chegada` → 002, `reagendar-apos-reiniciar` → 003, `pomodoro-meta-e-progresso` → 004. |
+| 1.8 | 2026-10-29 | Spec 003 `reagendar-apos-reiniciar`: `BootReceiver`, `Reagendador`, `RegistroChegada`, `CompromissoAlarmScheduler.reagendar`, canal criado no `Application`, ID da notificação de lembretes pausados e `RAIO_CHEGADA_METROS` (§3.2, §5.2, §7); DT-05 corrigido (🧪). |
