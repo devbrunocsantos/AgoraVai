@@ -1,17 +1,12 @@
 package com.brunocsantos.agoravai.services.geofence
 
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.brunocsantos.agoravai.R
 import com.brunocsantos.agoravai.data.AppDatabase
-import com.brunocsantos.agoravai.notifications.CHANNEL_ID
-import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
 import com.brunocsantos.agoravai.notifications.calcularHorarios
 import com.brunocsantos.agoravai.notifications.estaNaJanelaDeChegada
 import com.google.android.gms.location.Geofence
@@ -54,7 +49,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     private fun handleCompromissoChegada(context: Context, compromissoId: Long) {
         val dao = AppDatabase.getDatabase(context).appDao()
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // goAsync mantém o receiver vivo até o acesso ao banco terminar (LEMB-09.d)
         val pendingResult = goAsync()
@@ -78,29 +72,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                     return@launch
                 }
 
-                Log.d("AgoraVai-Geofence", "Chegada detectada para: ${compromisso.titulo}")
-
-                // 1. Quem chegou também saiu: grava as duas confirmações
-                dao.confirmarSaida(compromissoId)
-                dao.confirmarChegada(compromissoId)
-
-                // 2. Cancela etapas, saída e atraso que ainda não dispararam, e fecha o lembrete de saída se estiver aberto (LEMB-09.b)
-                CompromissoAlarmScheduler.cancelar(context, compromissoId, dados.etapas.size)
-                notificationManager.cancel(CompromissoAlarmScheduler.idAlarmeSaida(compromissoId))
-
-                // 3. Mostra Notificação de Sucesso
-                val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setContentTitle("Você chegou! \uD83C\uDFC1")
-                    .setContentText("Destino alcançado: ${compromisso.titulo}")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(true)
-                    .build()
-
-                notificationManager.notify((compromissoId * 100 + 999).toInt(), notification)
-
-                // 4. Remove o Geofence (Limpeza)
-                CompromissoGeofenceManager.removeGeofence(compromissoId)
+                RegistroChegada.registrar(context, dados)
             } finally {
                 pendingResult.finish()
             }

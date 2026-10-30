@@ -291,8 +291,8 @@ if (local == null) cts.cancel()
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug`
-- [ ] Testes da Fase 1 seguem verdes (`classificarPosicao` cobre a decisão)
+- [x] `./gradlew testDebugUnitTest assembleDebug` ✅ (30/30)
+- [x] Testes da Fase 1 seguem verdes (`classificarPosicao` cobre a decisão)
 
 #### Verificação manual
 - [ ] M5 — CA-1.7 (no destino)
