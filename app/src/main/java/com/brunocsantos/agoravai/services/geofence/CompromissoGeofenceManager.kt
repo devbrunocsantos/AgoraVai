@@ -1,6 +1,5 @@
 package com.brunocsantos.agoravai.services.geofence
 
-import com.brunocsantos.agoravai.notifications.RAIO_CHEGADA_METROS
 import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
@@ -10,6 +9,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.brunocsantos.agoravai.data.Compromisso
 import com.brunocsantos.agoravai.data.Etapa
+import com.brunocsantos.agoravai.notifications.RAIO_CHEGADA_METROS
 import com.brunocsantos.agoravai.notifications.fimDaJanelaDeChegada
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest

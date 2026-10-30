@@ -1,6 +1,5 @@
 package com.brunocsantos.agoravai.ui.compromissos
 
-import com.brunocsantos.agoravai.notifications.MENSAGEM_PERMISSAO_ALARME
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -20,6 +19,7 @@ import com.brunocsantos.agoravai.data.ItemLembrete
 import com.brunocsantos.agoravai.data.NotificationType
 import com.brunocsantos.agoravai.network.RetrofitInstance
 import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
+import com.brunocsantos.agoravai.notifications.MENSAGEM_PERMISSAO_ALARME
 import com.brunocsantos.agoravai.notifications.calcularHorarios
 import com.brunocsantos.agoravai.services.geofence.CompromissoGeofenceManager
 import com.brunocsantos.agoravai.utils.SettingsManager

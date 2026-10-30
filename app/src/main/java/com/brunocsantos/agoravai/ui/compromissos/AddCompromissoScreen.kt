@@ -1,6 +1,5 @@
 package com.brunocsantos.agoravai.ui.compromissos
 
-import com.brunocsantos.agoravai.notifications.MENSAGEM_PERMISSAO_ALARME
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.brunocsantos.agoravai.data.NotificationType
+import com.brunocsantos.agoravai.notifications.MENSAGEM_PERMISSAO_ALARME
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

@@ -22,6 +22,7 @@ import com.brunocsantos.agoravai.services.geofence.RegistroChegada
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -41,11 +42,10 @@ object Reagendador {
     private const val ATRASO_SAIDA_SEM_LOCALIZACAO_MS = 45_000L
 
     suspend fun reagendarTudo(context: Context, reinicio: Boolean) {
-        val inicio = System.currentTimeMillis()
+        val agora = System.currentTimeMillis()
         Log.d(TAG, "inicio reinicio=$reinicio")
 
         val dao = AppDatabase.getDatabase(context).appDao()
-        val agora = System.currentTimeMillis()
         val compromissos = dao.getCompromissosAtivosComEtapas()
 
         // LEMB-11.e: sem alarme exato, só o que não depende de alarme é feito
@@ -57,52 +57,65 @@ object Reagendador {
         var localizacao: Location? = null
 
         compromissos.forEach { c ->
-            var plano = planoDe(c, agora, reinicio)
-            val itens = c.itensLembrete.map { it.nomeItem }
+            // Uma falha num compromisso não pode impedir o reagendamento dos outros (P2)
+            try {
+                var plano = planoDe(c, agora, reinicio)
+                val itens = c.itensLembrete.map { it.nomeItem }
 
-            // LEMB-11.i: saída perdida com destino no período → a chegada tem precedência
-            if (plano.saidaPerdida && plano.ativacaoChegada != null) {
-                if (!localizacaoLida) {
-                    localizacao = lerLocalizacao(context)
-                    localizacaoLida = true
-                }
-                when (posicao(c, localizacao)) {
-                    PosicaoChegada.DENTRO -> {
-                        RegistroChegada.registrar(context, c)
-                        return@forEach
+                // LEMB-11.i: saída perdida com destino no período → a chegada tem precedência
+                if (plano.saidaPerdida && plano.ativacaoChegada != null) {
+                    if (!localizacaoLida) {
+                        localizacao = lerLocalizacao(context)
+                        localizacaoLida = true
                     }
-                    PosicaoChegada.FORA -> Unit
-                    PosicaoChegada.DESCONHECIDA ->
-                        // Sem alarme exato não dá para esperar: a saída é entregue na hora
-                        if (podeAgendarExato) plano = plano.copy(saida = agora + ATRASO_SAIDA_SEM_LOCALIZACAO_MS)
+                    when (posicao(c, localizacao)) {
+                        PosicaoChegada.DENTRO -> {
+                            RegistroChegada.registrar(context, c)
+                            return@forEach
+                        }
+                        PosicaoChegada.FORA -> Unit
+                        PosicaoChegada.DESCONHECIDA ->
+                            // Sem alarme exato não dá para esperar: a saída é entregue na hora
+                            if (podeAgendarExato) plano = plano.copy(saida = agora + ATRASO_SAIDA_SEM_LOCALIZACAO_MS)
+                    }
                 }
-            }
 
-            if (podeAgendarExato) {
-                CompromissoAlarmScheduler.reagendar(context, c.compromisso, c.etapas, itens, plano)
-            } else {
-                CompromissoAlarmScheduler.cancelar(context, c.compromisso.id, c.etapas.size)
-                // A detecção de chegada não depende de alarme: é ativada direto (LEMB-11, RF-003)
-                if (plano.ativacaoChegada != null) {
-                    CompromissoGeofenceManager.addGeofenceChegada(c.compromisso, c.etapas)
+                if (podeAgendarExato) {
+                    CompromissoAlarmScheduler.reagendar(context, c.compromisso, c.etapas, itens, plano)
+                } else {
+                    CompromissoAlarmScheduler.cancelar(context, c.compromisso.id, c.etapas.size)
+                    // A detecção de chegada não depende de alarme: é ativada direto (LEMB-11, RF-003)
+                    if (plano.ativacaoChegada != null) {
+                        CompromissoGeofenceManager.addGeofenceChegada(c.compromisso, c.etapas)
+                    }
+                    if (plano.saidaPerdida) {
+                        CompromissoAlarmScheduler.dispararSaidaAgora(context, c.compromisso, itens)
+                    }
+                    // Lembretes futuros que ficaram sem agendar geram o aviso
+                    if (plano.etapas.isNotEmpty() || plano.atraso != null || (plano.saida != null && !plano.saidaPerdida)) {
+                        lembretesPausados = true
+                    }
                 }
-                if (plano.saidaPerdida) {
-                    CompromissoAlarmScheduler.dispararSaidaAgora(context, c.compromisso, itens)
-                }
-                // Lembretes futuros que ficaram sem agendar geram o aviso
-                if (plano.etapas.isNotEmpty() || plano.atraso != null || (plano.saida != null && !plano.saidaPerdida)) {
-                    lembretesPausados = true
-                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Falha ao reagendar o compromisso ${c.compromisso.id}", e)
             }
         }
 
         if (lembretesPausados) mostrarAvisoLembretesPausados(context)
 
         // AUTO-05: as geofences das automações ativas também somem ao reiniciar
-        dao.getActiveAutomationSettings().forEach { GeofenceManager.addOrUpdateGeofence(it) }
+        try {
+            dao.getActiveAutomationSettings().forEach { GeofenceManager.addOrUpdateGeofence(it) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Falha ao reativar as geofences das automações", e)
+        }
 
         // RNF-002: tempo total do reagendamento
-        Log.d(TAG, "fim n=${compromissos.size} em ${System.currentTimeMillis() - inicio}ms")
+        Log.d(TAG, "fim n=${compromissos.size} em ${System.currentTimeMillis() - agora}ms")
     }
 
     // LEMB-11.e: só ocorre no Android 12+, pois abaixo disso podeAgendarExato é sempre true
@@ -171,16 +184,19 @@ object Reagendador {
 
         val cts = CancellationTokenSource()
         return try {
-            val local = withTimeoutOrNull(TIMEOUT_LOCALIZACAO_MS) {
+            withTimeoutOrNull(TIMEOUT_LOCALIZACAO_MS) {
                 LocationServices.getFusedLocationProviderClient(context)
                     .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                     .await()
             }
-            if (local == null) cts.cancel()
-            local
-        } catch (e: SecurityException) {
-            Log.e(TAG, "Sem permissão para ler a localização", e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Sem permissão, Play Services indisponível logo após o boot etc.: decide como DESCONHECIDA
+            Log.e(TAG, "Não foi possível ler a localização", e)
             null
+        } finally {
+            cts.cancel()
         }
     }
 }
