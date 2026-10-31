@@ -22,7 +22,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
 | 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
 | 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | implementada — M1–M5 ✅ (2026-10-30); faltam M6–M10 no emulador → `/validar 003` |
-| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-12) | Must | alto | P | 001, 002 | rascunho — achados dos testes da 003 em 2026-10-30 |
+| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-11, LEMB-12) | Must | alto | M | 001, 002, 003 | esclarecida — próximo: `/pesquisar 005` |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
 | 004 | Pomodoro: meta da sessão e progresso (DT-07, 08, 18) | Should | médio | M | — | rascunho (pesquisa/plano prévios) |
@@ -39,7 +39,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 - **001** — validação — rodar A4 (Android 14) e R4 (Android 12/12L) e então `/validar 001`.
 - **002** — validação — B5 e B6 ✅; faltam R4 e R5 (ver risco DT-21) e então `/validar 002`.
 - **003** — validação — M1–M5 ✅ e ajustes QUICKBOOT/alarme inexato (`1da2e03`); rodar M6–M10 no emulador e então `/validar 003`.
-- **005** — especificação — rascunho com 3 questões para `/esclarecer`.
+- **005** — esclarecida (5 perguntas respondidas, 11 RFs, 26 CAs) — próximo: `/pesquisar 005` em sessão nova.
 
 ## Decisões
 | Data | Decisão | Motivo | Impacto |
@@ -53,6 +53,8 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 2026-10-29 | 003: aviso "Seus lembretes estão pausados" abre direto a tela da permissão | P5: um toque a menos | RF-004 |
 | 2026-10-30 | 003: incluir `QUICKBOOT_POWERON` e ativar a chegada por alarme inexato sem alarme exato | Pendências da revisão de código aprovadas pelo Bruno | `1da2e03`; caso novo no M7 |
 | 2026-10-30 | 005: lembretes do compromisso em edição esperam até sair do formulário; compromisso sem repetição encerrado é desligado e religá-lo é bloqueado | Achados do Bruno nos testes da 003 | Spec 005 |
+| 2026-10-30 | 005: encerra no horário do evento sem cortar atraso/chegada; formulário fora da tela libera os retidos; chegada segue na edição; ao liberar ou religar, vale a regra da 003 (só "HORA DE SAIR", antes do evento; etapas e atrasos passados descartados) | `/esclarecer` | RF-003, 005, 006, 007 |
+| 2026-10-30 | 005: religar antes do evento um compromisso desligado à mão entra na spec, com a regra da 003 | Mesmo defeito da História 2 | RF-011; esforço P → M |
 | 2026-10-29 | Reescrever as 4 specs no template novo; `implement.md` mesclado no `plano.md` | Padronizar os artefatos | CAs citam o ID antigo (`CA-1.4 (LEMB-09.f)`) |
 
 ## Riscos
@@ -67,4 +69,5 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 ## Próximos passos
 1. Rodar no aparelho A4 e R4 (001) e R4 e R5 (002) → `/validar 001` e `/validar 002`.
 2. Rodar M1–M10 (003) em aparelho → `/validar 003`.
-3. Especificar DT-21.
+3. `/pesquisar 005` (sessão nova) → `/planejar 005`.
+4. Especificar DT-21.
