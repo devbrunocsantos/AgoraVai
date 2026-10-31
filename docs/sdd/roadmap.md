@@ -1,6 +1,6 @@
 # Roadmap: Agora Vai
 
-> Atualizado em: 2026-10-29
+> Atualizado em: 2026-10-30
 
 ## Visão
 Um app em que o usuário confia de olhos fechados para sair na hora: nenhum
@@ -21,7 +21,8 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 |---|---|---|---|---|---|---|
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
 | 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
-| 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | implementada — roteiros M1–M10 em aparelho → `/validar 003` |
+| 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | implementada — M1–M5 ✅ (2026-10-30); faltam M6–M10 no emulador → `/validar 003` |
+| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-12) | Must | alto | P | 001, 002 | rascunho — achados dos testes da 003 em 2026-10-30 |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
 | 004 | Pomodoro: meta da sessão e progresso (DT-07, 08, 18) | Should | médio | M | — | rascunho (pesquisa/plano prévios) |
@@ -37,7 +38,8 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 ## Em andamento
 - **001** — validação — rodar A4 (Android 14) e R4 (Android 12/12L) e então `/validar 001`.
 - **002** — validação — B5 e B6 ✅; faltam R4 e R5 (ver risco DT-21) e então `/validar 002`.
-- **003** — validação — implementada (fases 1–5); rodar M1–M10 em aparelho e então `/validar 003`.
+- **003** — validação — M1–M5 ✅ e ajustes QUICKBOOT/alarme inexato (`1da2e03`); rodar M6–M10 no emulador e então `/validar 003`.
+- **005** — especificação — rascunho com 3 questões para `/esclarecer`.
 
 ## Decisões
 | Data | Decisão | Motivo | Impacto |
@@ -49,6 +51,8 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 2026-10-29 | Atualizar o AGP para 8.13.2 após verificação (opção A) | Build limpo e testes passando | Commit separado `f4be55c` |
 | 2026-10-29 | 003: saída perdida com o aparelho desligado toca logo após religar, se o evento não passou | P2: não falhar em silêncio | RF-002a, CA-1.4/1.5 |
 | 2026-10-29 | 003: aviso "Seus lembretes estão pausados" abre direto a tela da permissão | P5: um toque a menos | RF-004 |
+| 2026-10-30 | 003: incluir `QUICKBOOT_POWERON` e ativar a chegada por alarme inexato sem alarme exato | Pendências da revisão de código aprovadas pelo Bruno | `1da2e03`; caso novo no M7 |
+| 2026-10-30 | 005: lembretes do compromisso em edição esperam até sair do formulário; compromisso sem repetição encerrado é desligado e religá-lo é bloqueado | Achados do Bruno nos testes da 003 | Spec 005 |
 | 2026-10-29 | Reescrever as 4 specs no template novo; `implement.md` mesclado no `plano.md` | Padronizar os artefatos | CAs citam o ID antigo (`CA-1.4 (LEMB-09.f)`) |
 
 ## Riscos
