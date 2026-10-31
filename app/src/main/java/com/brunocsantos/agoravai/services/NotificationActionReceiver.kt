@@ -76,6 +76,9 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
             // --- NOVA AÇÃO: Checar se está atrasado ---
             Actions.CHECK_LATE.toString() -> {
+                // LEMB-12 (RF-001): atraso do compromisso em edição espera; ao liberar, atraso
+                // passado é descartado pela regra da 003
+                if (compromissoId != -1L && EdicaoEmAndamento.reter(compromissoId)) return
                 if (compromissoId != -1L) {
                     CoroutineScope(Dispatchers.IO).launch {
                         val dao = AppDatabase.getDatabase(context).appDao()

@@ -111,8 +111,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initialScreen = intent.getStringExtra("destination_screen")
         lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onStart(owner: LifecycleOwner) { AppForegroundState.setAppInForeground(true) }
-            override fun onStop(owner: LifecycleOwner) { AppForegroundState.setAppInForeground(false) }
+            override fun onStart(owner: LifecycleOwner) {
+                AppForegroundState.setAppInForeground(true)
+                compromissoViewModel.formularioVoltouATela() // LEMB-12 (RF-006)
+            }
+            override fun onStop(owner: LifecycleOwner) {
+                AppForegroundState.setAppInForeground(false)
+                // LEMB-12 (RF-006): tela apagada, outro app ou segundo plano liberam; girar a tela não
+                if (!isChangingConfigurations) compromissoViewModel.formularioSaiuDaTela()
+            }
         })
         billingClientManager = BillingClientManager(this)
         initializePlacesApi()
@@ -251,7 +258,8 @@ fun MainScreenWithBottomNav(
     var showSettingsScreen by remember { mutableStateOf(false) }
     var showAutomationSettingsScreen by remember { mutableStateOf(false) }
     var showHistoryScreen by remember { mutableStateOf(false) }
-    var showAddCompromissoScreen by remember { mutableStateOf(false) }
+    // LEMB-12 / CA-1.15: o formulário aberto vive no ViewModel para sobreviver à rotação
+    val showAddCompromissoScreen by compromissoViewModel.formularioAberto.collectAsStateWithLifecycle()
     var showPermissionsScreen by remember { mutableStateOf(false) } // <-- NOVO ESTADO
 
     val pomodoroAutomationState by pomodoroViewModel.editAutomationUiState.collectAsStateWithLifecycle()
@@ -270,10 +278,7 @@ fun MainScreenWithBottomNav(
             showAutomationSettingsScreen -> showAutomationSettingsScreen = false
             showHistoryScreen -> showHistoryScreen = false
             showSettingsScreen -> showSettingsScreen = false
-            showAddCompromissoScreen -> {
-                showAddCompromissoScreen = false
-                compromissoViewModel.resetAddCompromissoState()
-            }
+            showAddCompromissoScreen -> compromissoViewModel.fecharSemSalvar() // LEMB-12 (RF-003)
         }
     }
 
@@ -338,15 +343,9 @@ fun MainScreenWithBottomNav(
             AddCompromissoScreen(
                 uiState = compromissoState,
                 viewModel = compromissoViewModel,
-                onSaveClick = {
-                    compromissoViewModel.salvarCompromisso(context, apiKey) {
-                        showAddCompromissoScreen = false
-                    }
-                },
-                onBackClick = {
-                    showAddCompromissoScreen = false
-                    compromissoViewModel.resetAddCompromissoState()
-                }
+                // O ViewModel fecha o formulário ao salvar com sucesso (LEMB-12)
+                onSaveClick = { compromissoViewModel.salvarCompromisso(context, apiKey) {} },
+                onBackClick = { compromissoViewModel.fecharSemSalvar() } // LEMB-12 (RF-003)
             )
         }
         showSettingsScreen -> {
@@ -399,14 +398,8 @@ fun MainScreenWithBottomNav(
                     if (selectedScreen == 0) {
                         CompromissosScreen(
                             viewModel = compromissoViewModel,
-                            onNavigateToAdd = {
-                                compromissoViewModel.resetAddCompromissoState()
-                                showAddCompromissoScreen = true
-                            },
-                            onNavigateToEdit = { compromisso ->
-                                compromissoViewModel.iniciarEdicao(compromisso)
-                                showAddCompromissoScreen = true
-                            }
+                            onNavigateToAdd = { compromissoViewModel.abrirCriacao() },
+                            onNavigateToEdit = { compromisso -> compromissoViewModel.abrirEdicao(compromisso) }
                         )
                     } else {
                         PomodoroScreen(

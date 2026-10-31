@@ -45,12 +45,15 @@ object NotificationScheduler {
         triggerAtMillis: Long,
         notificationId: Int,
         title: String,
-        message: String
+        message: String,
+        compromissoId: Long = -1L
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra(EXTRA_TITLE, title)
             putExtra(EXTRA_MESSAGE, message)
+            // LEMB-12: a etapa precisa do compromisso para ser retida durante a edição (arquitetura.md §5.2)
+            if (compromissoId != -1L) putExtra(EXTRA_COMPROMISSO_ID, compromissoId)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(

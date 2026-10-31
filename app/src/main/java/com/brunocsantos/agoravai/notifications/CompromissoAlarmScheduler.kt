@@ -96,7 +96,8 @@ object CompromissoAlarmScheduler {
             horario,
             idAlarmeEtapa(compromissoId, etapas.size - 1 - index),
             "Próximo Preparativo: ${etapa.descricao}",
-            "Faltam ${etapa.duracaoMinutos} min."
+            "Faltam ${etapa.duracaoMinutos} min.",
+            compromissoId
         )
     }
 
@@ -124,8 +125,11 @@ object CompromissoAlarmScheduler {
     }
 
     // LEMB-11.e: sem alarme exato, a saída perdida é entregue na hora, sem passar pelo AlarmManager
-    fun dispararSaidaAgora(context: Context, compromisso: Compromisso, itens: List<String>) {
-        context.sendBroadcast(intentSaida(context, compromisso, itens))
+    // LEMB-12 (RF-003): com semRetencao, a saída liberada depois da edição não é retida de novo
+    fun dispararSaidaAgora(context: Context, compromisso: Compromisso, itens: List<String>, semRetencao: Boolean = false) {
+        val intent = intentSaida(context, compromisso, itens)
+        if (semRetencao) intent.putExtra(EXTRA_SEM_RETENCAO, true)
+        context.sendBroadcast(intent)
     }
 
     private fun agendarSaida(context: Context, compromisso: Compromisso, horario: Long, itens: List<String>) {

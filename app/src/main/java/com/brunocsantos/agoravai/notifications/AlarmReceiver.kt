@@ -8,6 +8,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.brunocsantos.agoravai.R
+import com.brunocsantos.agoravai.services.EdicaoEmAndamento
 import com.brunocsantos.agoravai.ui.ReminderActivity
 
 const val CHANNEL_ID = "agora_vai_channel"
@@ -22,6 +23,8 @@ const val EXTRA_ITEMS = "EXTRA_ITEMS" // Novo: Lista de strings
 const val EXTRA_COMPROMISSO_ID = "EXTRA_COMPROMISSO_ID" // Novo: ID para confirmação
 // ID da notificação a fechar, lido pelo NotificationActionReceiver (valor mantido por compatibilidade)
 const val EXTRA_ACTION_NOTIFICATION_ID = "EXTRA_NOTIFICATION_ID"
+// LEMB-12 (RF-003): saída liberada depois da edição; não passa de novo pela retenção
+const val EXTRA_SEM_RETENCAO = "EXTRA_SEM_RETENCAO"
 
 private const val TAG = "AgoraVai-Debug"
 
@@ -37,6 +40,13 @@ class AlarmReceiver : BroadcastReceiver() {
         // Novos dados recebidos do ViewModel
         val items = intent.getStringArrayListExtra(EXTRA_ITEMS)
         val compromissoId = intent.getLongExtra(EXTRA_COMPROMISSO_ID, -1L)
+
+        // LEMB-12 (RF-001): lembrete do compromisso em edição espera enquanto o formulário está visível
+        val semRetencao = intent.getBooleanExtra(EXTRA_SEM_RETENCAO, false)
+        if (compromissoId != -1L && !semRetencao && EdicaoEmAndamento.reter(compromissoId)) {
+            Log.d(TAG, "Lembrete retido durante a edição: compromisso $compromissoId")
+            return
+        }
 
         Log.d(TAG, "Alarme disparado. Tipo: $typeOrdinal, ID: $notificationId, Itens: ${items?.size}")
 

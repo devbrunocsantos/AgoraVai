@@ -55,6 +55,7 @@ Duas mudanças independentes, sobre a mesma base de regras puras:
 | Liberar só **se houve retenção** | Liberar sempre que a saída passou | Evita repetir a notificação já na bandeja (P5, §9 "continua aberto"). Aprovado pelo Bruno. |
 | Estado "formulário aberto" vai para o ViewModel (`StateFlow`) | `rememberSaveable` | O VM (escopo de Activity) sobrevive à rotação; após morte do processo o formulário fecha junto com o `EdicaoEmAndamento`, sem restaurar um formulário vazio. Efeito colateral aceito: a criação também passa a sobreviver à rotação. |
 | Liberação entrega a saída com `EXTRA_SEM_RETENCAO = true` | `sendBroadcast` comum | Evita corrida: se o formulário voltar a ficar visível antes da entrega do broadcast, a saída liberada não é retida de novo. |
+| Sair durante um salvamento em andamento: contador `sessaoFormulario` checado antes das gravações (desvio da implementação, 2026-10-30) | Cancelar o `Job` do salvamento | Cancelar no meio poderia deixar o compromisso gravado com os alarmes já cancelados e sem o novo agendamento (P2). Com a sessão, o salvamento iniciado em outra abertura do formulário termina sem gravar. |
 | Lista atualiza com um fluxo `agora` de 30 s (`WhileSubscribed`) | Alarme no horário do evento | Mais simples; atende RNF-002 (≤ 1 min); só roda com a lista na tela. |
 | `onStop` com `isChangingConfigurations` não libera | Liberar sempre no `onStop` | Rotação não conta como sair (RF-006, CA-1.15). |
 | Liberação roda num escopo do processo (`CoroutineScope(SupervisorJob() + Dispatchers.IO)`), não no `viewModelScope` | `viewModelScope` | A tela cheia de outro compromisso abre com `NEW_TASK | CLEAR_TASK` na mesma task (`AlarmReceiver.kt:61`, sem `taskAffinity` em `AndroidManifest.xml:83-90`) e destrói a `MainActivity` logo após o `onStop`; o VM é limpo e cancelaria a liberação. Padrão de `NotificationActionReceiver.kt:47`. |
@@ -242,8 +243,8 @@ Com `private val escopoLiberacao = CoroutineScope(SupervisorJob() + Dispatchers.
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug` verde
-- [ ] `grep -rn "\"EXTRA_SEM_RETENCAO\"" app/src/main/java` aparece só na constante
+- [x] `./gradlew testDebugUnitTest assembleDebug` verde ✅ 55/55
+- [x] `grep -rn "\"EXTRA_SEM_RETENCAO\"" app/src/main/java` aparece só na constante ✅
 
 #### Verificação manual (emulador ou aparelho, tipo PADRAO salvo indicação; destino a ~1 km; anotar a saída S exibida)
 - [ ] **A1 — CA-1.1, CA-1.2:** compromisso sem etapas, evento em +15 min. Em S−3 abrir a edição e manter a tela ligada. Em S nada aparece. Em S+2 voltar sem salvar → "HORA DE SAIR" em até 5 s; em S+10 "Você está atrasado!".
@@ -466,6 +467,7 @@ Casos de borda (unitários): `agora == saida` conta como saída perdida; `decisa
 | `onStop` não disparar com tela apagada em algum aparelho | Retido até voltar ao formulário | Roteiro A5 confirma; `onStop` é o contrato do Android para tela apagada. |
 | Tela cheia de outro compromisso (B) abre com o formulário de A na tela | `onStop` libera A e a `MainActivity` é destruída (CLEAR_TASK); a edição de A é perdida | Coerente com RF-006; a liberação roda fora do VM (Decisões) e `onCleared` limpa o estado. Roteiro C1. |
 | Snackbar de permissão abre Configurações | `onStop` libera | Coerente com RF-006. |
+| Autocomplete de endereço (Places) em tela cheia por cima do formulário | `onStop` libera: o "HORA DE SAIR" retido pode tocar enquanto a pessoa escolhe o endereço | Coerente com RF-006 (o formulário saiu da tela); conferir no roteiro A1 variando com o autocomplete. |
 | Alarme de etapa antigo (agendado antes da atualização) sem `EXTRA_COMPROMISSO_ID` | Etapa antiga não é retida | `MY_PACKAGE_REPLACED` → Reagendador regrava os alarmes com o extra novo (`BootReceiver.kt:19-23`). |
 | Compromissos encerrados ficam `isEnabled = true` para sempre | Reagendador gera plano vazio para eles; custo desprezível | Aceito (D2). |
 
@@ -484,3 +486,4 @@ Sem migração de dados. Cada fase é um commit; rollback = reverter o commit da
 <!-- Preenchido por /implementar -->
 
 - **Fase 1 (2026-10-30):** regras puras em `notifications/HorariosLembrete.kt` (`deveReter`, `deveTocarSaidaAoLiberar`, `estaEncerrado`, `DecisaoAoLigar`/`decisaoAoLigar`); `Reagendador.planoDe` público. Testes `EdicaoLembretesTest` (13) e `EncerramentoTest` (12); `testDebugUnitTest assembleDebug` → 55/55.
+- **Fase 2 (2026-10-30):** `services/EdicaoEmAndamento.kt`; `EXTRA_SEM_RETENCAO`; etapa leva `EXTRA_COMPROMISSO_ID`; `AlarmReceiver` e `CHECK_LATE` consultam a retenção; formulário no VM (`formularioAberto`, `abrirCriacao`, `abrirEdicao`, `fecharSemSalvar`, `formularioSaiuDaTela`, `formularioVoltouATela`, `onCleared`); liberação em `escopoLiberacao`; `MainActivity` usa o estado do VM e chama o VM no `onStart`/`onStop`. Desvio: contador `sessaoFormulario` em vez de cancelar o `Job` (ver Decisões). Revisão de código: a finalização do salvar e as mensagens de erro também conferem a sessão (um salvamento antigo não fecha nem mostra erro no formulário seguinte). 55/55.

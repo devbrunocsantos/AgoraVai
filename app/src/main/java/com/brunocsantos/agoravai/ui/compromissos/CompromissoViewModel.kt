@@ -19,13 +19,20 @@ import com.brunocsantos.agoravai.data.ItemLembrete
 import com.brunocsantos.agoravai.data.NotificationType
 import com.brunocsantos.agoravai.network.RetrofitInstance
 import com.brunocsantos.agoravai.notifications.CompromissoAlarmScheduler
+import com.brunocsantos.agoravai.notifications.Reagendador
+import com.brunocsantos.agoravai.notifications.deveTocarSaidaAoLiberar
 import com.brunocsantos.agoravai.notifications.MENSAGEM_PERMISSAO_ALARME
 import com.brunocsantos.agoravai.notifications.calcularHorarios
+import com.brunocsantos.agoravai.services.EdicaoEmAndamento
 import com.brunocsantos.agoravai.services.geofence.CompromissoGeofenceManager
 import com.brunocsantos.agoravai.utils.SettingsManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +48,10 @@ import java.util.TimeZone
 import kotlin.random.Random
 
 enum class AddressField { ORIGIN, DESTINATION }
+
+// LEMB-12: a liberação roda fora do viewModelScope. A tela cheia de outro compromisso abre com
+// CLEAR_TASK e destrói a MainActivity logo após o onStop; o viewModelScope cancelaria a liberação
+private val escopoLiberacao = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 data class EtapaState(
     val id: Int = System.currentTimeMillis().toInt() + Random.nextInt(),
@@ -81,6 +92,14 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
     val addCompromissoUiState: StateFlow<AddCompromissoUiState> = _addCompromissoUiState.asStateFlow()
 
     private val defaultSafetyTime = SettingsManager.safetyTime
+
+    // LEMB-12 / CA-1.15: o formulário aberto vive no VM (escopo de Activity) para sobreviver à rotação
+    private val _formularioAberto = MutableStateFlow(false)
+    val formularioAberto: StateFlow<Boolean> = _formularioAberto.asStateFlow()
+
+    // Cada abertura/fechamento do formulário muda a sessão; um salvamento só grava se a sessão
+    // em que começou ainda for a atual (sair durante a chamada de rota não grava depois)
+    private var sessaoFormulario = 0
 
     init {
         viewModelScope.launch { try { dao.deleteExpiredCompromissos(System.currentTimeMillis()) } catch (e: Exception) { Log.e("CompromissoVM", "Erro clean", e) } }
@@ -137,9 +156,72 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
         )
     }
 
+    // --- Abrir e fechar o formulário (LEMB-12) ---
+    fun abrirCriacao() {
+        resetAddCompromissoState()
+        sessaoFormulario++
+        _formularioAberto.value = true
+    }
+
+    fun abrirEdicao(c: CompromissoComEtapas) {
+        iniciarEdicao(c)
+        EdicaoEmAndamento.iniciar(c.compromisso.id)
+        sessaoFormulario++
+        _formularioAberto.value = true
+    }
+
+    // RF-003: sair sem salvar (voltar, ícone, inclusive depois de uma recusa)
+    fun fecharSemSalvar() {
+        sessaoFormulario++
+        _formularioAberto.value = false
+        resetAddCompromissoState()
+        val (id, houveRetencao) = EdicaoEmAndamento.encerrar()
+        liberar(id, houveRetencao)
+    }
+
+    // RF-006: o formulário deixou de estar visível (tela apagada, outro app, app em segundo plano)
+    fun formularioSaiuDaTela() {
+        if (!_formularioAberto.value) return
+        val (id, houveRetencao) = EdicaoEmAndamento.suspender()
+        liberar(id, houveRetencao)
+    }
+
+    // RF-006: o formulário voltou a ficar visível; a retenção recomeça para o que vier depois
+    fun formularioVoltouATela() {
+        if (_formularioAberto.value) EdicaoEmAndamento.tornarVisivel()
+    }
+
+    // RF-003: regra da 003 — no máximo o "HORA DE SAIR", e só se algo foi retido
+    private fun liberar(id: Long?, houveRetencao: Boolean) {
+        // A guarda antecipada só evita a leitura do banco; a regra testada é deveTocarSaidaAoLiberar
+        if (id == null || !houveRetencao) return
+        escopoLiberacao.launch {
+            try {
+                val c = dao.getCompromissoComEtapasById(id) ?: return@launch
+                val plano = Reagendador.planoDe(c, System.currentTimeMillis(), reinicio = true)
+                if (deveTocarSaidaAoLiberar(houveRetencao, plano)) {
+                    CompromissoAlarmScheduler.dispararSaidaAgora(
+                        applicationContext, c.compromisso, c.itensLembrete.map { it.nomeItem }, semRetencao = true
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("CompromissoVM", "Erro ao liberar lembretes da edição", e)
+            }
+        }
+    }
+
+    override fun onCleared() {
+        // A liberação já aconteceu no onStop; só limpa o estado
+        EdicaoEmAndamento.encerrar()
+        super.onCleared()
+    }
+
     // --- Salvar ---
     fun salvarCompromisso(context: Context, apiKey: String, onSuccess: () -> Unit) {
         val currentState = _addCompromissoUiState.value
+        val sessao = sessaoFormulario
         if (currentState.titulo.isBlank() || currentState.origem.isBlank() || currentState.destino.isBlank()) { _addCompromissoUiState.update { it.copy(saveError = "Preencha todos os campos.") }; return }
 
         val validatedEtapas = currentState.etapas.map { etapa ->
@@ -170,6 +252,10 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
 
                     val duracoesEtapas = validatedEtapas.filter { it.descricao.isNotBlank() }.map { it.duracaoMinutos.toIntOrNull() ?: 0 }
                     val horaLimiteInicio = calcularHorarios(currentState.calendar.timeInMillis, duracaoViagemMinutos, tempoSeguranca, duracoesEtapas).inicioPreparo
+
+                    // Saiu do formulário durante a chamada de rota: não grava, não reagenda nem
+                    // mostra erro no formulário seguinte
+                    if (sessao != sessaoFormulario) return@launch
 
                     if (horaLimiteInicio < System.currentTimeMillis()) {
                         val atraso = (System.currentTimeMillis() - horaLimiteInicio) / (1000 * 60)
@@ -213,9 +299,17 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
 
                     val finalCompromisso = compromissoParaSalvar.copy(id = compromissoId)
                     CompromissoAlarmScheduler.agendar(context, finalCompromisso, etapasParaSalvar, validatedItens.map { it.nome })
-                    onSuccess()
-                } else { _addCompromissoUiState.update { it.copy(saveError = "Rota não encontrada.") } }
-            } catch (e: Exception) { _addCompromissoUiState.update { it.copy(saveError = "Erro ao salvar.") } }
+                    // RF-002: salvou → os retidos são descartados e vale o novo agendamento. Se a pessoa
+                    // saiu durante as gravações e já abriu outro formulário, não mexe nele
+                    if (sessao == sessaoFormulario) {
+                        EdicaoEmAndamento.encerrar()
+                        sessaoFormulario++
+                        _formularioAberto.value = false
+                        onSuccess()
+                    }
+                } else if (sessao == sessaoFormulario) { _addCompromissoUiState.update { it.copy(saveError = "Rota não encontrada.") } }
+            } catch (e: CancellationException) { throw e
+            } catch (e: Exception) { if (sessao == sessaoFormulario) _addCompromissoUiState.update { it.copy(saveError = "Erro ao salvar.") } }
         }
     }
 
