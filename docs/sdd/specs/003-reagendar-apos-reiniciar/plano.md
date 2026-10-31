@@ -237,10 +237,10 @@ class BootReceiver : BroadcastReceiver() {
 - [x] Manifest mesclado (`app/build/intermediates/merged_manifests/debug/.../AndroidManifest.xml`) contém `RECEIVE_BOOT_COMPLETED` e o `BootReceiver` com as duas ações
 
 #### Verificação manual
-- [ ] M1 — CA-1.1, CA-1.3
-- [ ] M2 — CA-1.2, CA-1.4 (longe do destino)
-- [ ] M3 — CA-1.5
-- [ ] M4 — CA-1.6
+- [x] M1 — CA-1.1, CA-1.3 ✅ (2026-10-30)
+- [x] M2 — CA-1.2, CA-1.4 (longe do destino) ✅ (2026-10-30)
+- [x] M3 — CA-1.5 ✅ (2026-10-30)
+- [x] M4 — CA-1.6 ✅ (2026-10-30)
 - [ ] M6 — CA-2.1
 - [ ] M9 — RNF-001
 - [ ] M10 — RNF-002
@@ -295,9 +295,9 @@ if (local == null) cts.cancel()
 - [x] Testes da Fase 1 seguem verdes (`classificarPosicao` cobre a decisão)
 
 #### Verificação manual
-- [ ] M5 — CA-1.7 (no destino)
-- [ ] M2 repetido — CA-1.4 continua (fora do destino, a saída toca em ≤ 1 min)
-- [ ] B5 da spec 002 repetido — chegada pelo ENTER continua funcionando depois da extração do `RegistroChegada`
+- [x] M5 — CA-1.7 (no destino) ✅ (2026-10-30)
+- [x] M2 repetido — CA-1.4 continua (fora do destino, a saída toca em ≤ 1 min) ✅ (2026-10-30)
+- [x] B5 da spec 002 repetido — chegada pelo ENTER continua funcionando depois da extração do `RegistroChegada` ✅ (2026-10-30, coberto pelo M4)
 
 > ⏸ Pausar para verificação manual.
 
@@ -428,6 +428,7 @@ RF-004 (CA-3.1, CA-3.2) e RF-005 (CA-4.1, CA-4.2).
   - Sem alarme exato, a ativação direta da chegada antes do período não detecta quem já está no destino quando o preparo começa (limite já registrado em "Decisões"). Alternativa: agendar a ativação com alarme **inexato** (`setAndAllowWhileIdle`, que não exige permissão).
   - Incluir `android.intent.action.QUICKBOOT_POWERON` (alguns fabricantes antigos usam em vez de `BOOT_COMPLETED`).
   - O `Reagendador` (precedência e caminho sem permissão) só é verificável em aparelho (M5, M7): sem Robolectric (P8).
+- **Testes em aparelho:** 2026-10-30 — M1–M5 aprovados (informado pelo Bruno); o B5 da 002 repetido foi dado como coberto pelo M4 (mesmo caminho do ENTER → `RegistroChegada`), por decisão do Bruno. Pendentes no emulador: M6–M10.
 - **Desvios do plano:** nenhum além das correções acima (todas dentro do escopo).
 
 ## Referências
