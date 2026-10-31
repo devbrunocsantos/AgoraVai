@@ -22,7 +22,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
 | 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
 | 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | implementada — M1–M5 ✅ (2026-10-30); faltam M6–M10 no emulador → `/validar 003` |
-| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-11, LEMB-12) | Must | alto | M | 001, 002, 003 | esclarecida — próximo: `/pesquisar 005` |
+| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-11, LEMB-12) | Must | alto | M | 001, 002, 003 | pesquisada — revisar a pesquisa → `/planejar 005` |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
 | 004 | Pomodoro: meta da sessão e progresso (DT-07, 08, 18) | Should | médio | M | — | rascunho (pesquisa/plano prévios) |
@@ -39,7 +39,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 - **001** — validação — rodar A4 (Android 14) e R4 (Android 12/12L) e então `/validar 001`.
 - **002** — validação — B5 e B6 ✅; faltam R4 e R5 (ver risco DT-21) e então `/validar 002`.
 - **003** — validação — M1–M5 ✅ e ajustes QUICKBOOT/alarme inexato (`1da2e03`); rodar M6–M10 no emulador e então `/validar 003`.
-- **005** — esclarecida (5 perguntas respondidas, 11 RFs, 26 CAs) — próximo: `/pesquisar 005` em sessão nova.
+- **005** — pesquisada — revisar `pesquisa.md` e então `/planejar 005`.
 
 ## Decisões
 | Data | Decisão | Motivo | Impacto |

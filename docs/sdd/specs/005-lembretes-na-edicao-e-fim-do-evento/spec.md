@@ -1,7 +1,7 @@
 ---
 id: 005
 titulo: Lembretes durante a edição e compromisso encerrado
-status: esclarecida  # rascunho | esclarecida | pesquisada | planejada | em-implementacao | implementada | validada
+status: pesquisada  # rascunho | esclarecida | pesquisada | planejada | em-implementacao | implementada | validada
 criada_em: 2026-10-30
 atualizada_em: 2026-10-30
 responsavel: Bruno C. Santos
