@@ -31,7 +31,7 @@ Dois problemas encontrados pelo Bruno nos testes em aparelho da spec 003 (2026-1
 
 - Editar um compromisso sem ser interrompido pelos lembretes dele, sem que nenhum lembrete se perca em silêncio (P2).
 - A lista mostra como desativados os compromissos sem repetição que já terminaram.
-- Ativar um compromisso que já passou não dispara lembretes antigos.
+- Ativar um compromisso sem repetição cujo evento já passou não dispara lembretes antigos.
 
 ## 3. Não-objetivos
 
@@ -58,11 +58,11 @@ Como **pessoa ajustando um compromisso**, quero **que os lembretes dele esperem 
 
 **Critérios de aceitação:**
 - **CA-1.1 (LEMB-12.a)** — **Dado** um compromisso às 10:00 com saída às 9:15, **quando** abro a edição dele às 9:10 e continuo no formulário às 9:15, **então** "HORA DE SAIR" não toca.
-- **CA-1.2 (LEMB-12.b)** — **Dado** o cenário do CA-1.1, **quando** saio do formulário sem salvar às 9:17, **então** "HORA DE SAIR" toca imediatamente e "Você está atrasado!" continua agendado para 9:25.
-- **CA-1.3 (LEMB-12.c)** — **Dado** o cenário do CA-1.1, sem etapas, **quando** às 9:12 mudo o evento para 10:15 e salvo, **então** às 9:15 nada toca e "HORA DE SAIR" toca às 9:30.
+- **CA-1.2 (LEMB-12.b)** — **Dado** o cenário do CA-1.1, **quando** saio do formulário sem salvar às 9:17, **então** "HORA DE SAIR" toca em até 5 s (RNF-001) e, às 9:25, sem saída confirmada, "Você está atrasado!" toca.
+- **CA-1.3 (LEMB-12.c)** — **Dado** o cenário do CA-1.1, sem etapas, **quando** às 9:17 (com "HORA DE SAIR" retido) mudo o evento para 10:15 e salvo, **então** nada toca no momento do salvamento e "HORA DE SAIR" toca às 9:30.
 - **CA-1.4 (LEMB-12.d)** — **Dado** um compromisso com etapa às 9:00 e saída às 9:15, **quando** fico no formulário das 8:55 às 9:20 e saio sem salvar, **então** toca só "HORA DE SAIR" (o lembrete mais recente que deveria ter tocado), e não a etapa.
 - **CA-1.5 (LEMB-12.e)** — **Dado** os compromissos A e B, com saída de B às 9:15, **quando** às 9:15 estou editando A (ou criando um compromisso novo), **então** "HORA DE SAIR" de B toca normalmente.
-- **CA-1.6 (LEMB-12.f)** — **Dado** o cenário do CA-1.1, **quando** às 9:16 tento salvar e o app recusa (ex.: "Impossível! Atraso de N min.") e então saio do formulário, **então** "HORA DE SAIR" toca imediatamente.
+- **CA-1.6 (LEMB-12.f)** — **Dado** o cenário do CA-1.1, **quando** às 9:16 tento salvar sem mudar o horário, vejo "Impossível! Atraso de 1 min." e então saio do formulário, **então** "HORA DE SAIR" toca em até 5 s (RNF-001).
 
 ### História 2 — Compromisso encerrado aparece desativado (Prioridade: P2)
 
@@ -76,7 +76,7 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 - **CA-2.1 (COMP-10.b)** — **Dado** um compromisso sem repetição às 10:00, **quando** ele termina (RF-007) e abro a lista, **então** o switch aparece desligado e o card esmaecido.
 - **CA-2.2 (COMP-10.c)** — **Dado** um compromisso sem repetição cujo evento já passou, **quando** ligo o switch, **então** vejo "Esse compromisso já passou. Edite a data para ativá-lo de novo.", o switch continua desligado e nenhum lembrete toca.
 - **CA-2.3 (COMP-10.d)** — **Dado** um compromisso encerrado, **quando** edito a data para amanhã e salvo, **então** ele volta ativo e os lembretes são agendados para amanhã.
-- **CA-2.4 (COMP-10.e)** — **Dado** um compromisso com dias de repetição cujo evento já passou, **quando** abro a lista, **então** ele continua como estava (nada muda até a spec de repetição).
+- **CA-2.4 (COMP-10.e)** — **Dado** um compromisso com dias de repetição cujo evento já passou, **quando** abro a lista, **então** o switch continua ligado e desligá-lo e religá-lo não é bloqueado (nada muda até a spec de repetição).
 - **CA-2.5 (COMP-14.a)** — **Dado** um compromisso encerrado com "Excluir após concluir" marcado, **quando** abro o app, **então** ele é apagado, como hoje.
 
 ## 6. Requisitos funcionais
@@ -86,10 +86,11 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 - **RF-003** (LEMB-12): QUANDO o usuário sair do formulário sem salvar (inclusive depois de uma tentativa recusada), SE algum lembrete desse compromisso deveria ter tocado durante a edição, ENTÃO o sistema DEVE tocar imediatamente o mais recente deles; os lembretes ainda futuros DEVEM continuar agendados.
 - **RF-004** (LEMB-12): Lembretes de outros compromissos e o formulário de novo compromisso NÃO DEVEM ser afetados por RF-001 a RF-003.
 - **RF-005** (LEMB-12, LEMB-09): A detecção de chegada do compromisso em edição [PRECISA ESCLARECER: durante a edição, a detecção de chegada continua funcionando (e "Você chegou! 🏁" aparece normalmente) ou também fica retida até sair do formulário?]
-- **RF-006** (LEMB-12): SE o usuário sair do app com o formulário aberto (tela inicial, outro app, app encerrado), ENTÃO [PRECISA ESCLARECER: os lembretes retidos tocam na hora, como ao sair sem salvar, ou continuam retidos até a pessoa voltar ao formulário?]
+- **RF-006** (LEMB-12): SE o formulário deixar de estar visível sem a pessoa sair dele (tela apagada ou bloqueada, tela inicial, outro app, app encerrado pelo sistema), ENTÃO [PRECISA ESCLARECER: os lembretes retidos — e os que chegarem nesse intervalo — tocam na hora, como ao sair sem salvar, ou continuam retidos até a pessoa voltar ao formulário?] Girar a tela não conta como sair.
 - **RF-007** (COMP-10): QUANDO um compromisso sem dias de repetição terminar, o sistema DEVE desativá-lo (switch desligado, card esmaecido), sem cancelar o que ainda faltar dos lembretes e da detecção de chegada até esse momento. [PRECISA ESCLARECER: o compromisso termina no horário do evento ou ao fim do período de chegada (2 h depois do evento)?]
 - **RF-008** (COMP-10): SE o usuário tentar ativar um compromisso sem dias de repetição cujo evento já passou, ENTÃO o sistema DEVE exibir "Esse compromisso já passou. Edite a data para ativá-lo de novo.", manter o switch desligado e não agendar lembretes.
 - **RF-009** (COMP-13, COMP-14): Compromissos com dias de repetição NÃO DEVEM ser desativados por RF-007 nem bloqueados por RF-008; "Excluir após concluir" mantém o comportamento atual.
+- **RF-010** (COMP-09): QUANDO o usuário salvar a edição de um compromisso com evento no futuro, o sistema DEVE deixá-lo ativo e agendar os lembretes (sujeito a LEMB-10), esteja ele encerrado ou desligado à mão — como já acontece hoje ao salvar.
 
 ## 7. Requisitos não funcionais
 
@@ -98,7 +99,7 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 
 ## 8. Entidades e conceitos-chave
 
-- **Formulário de edição**: a tela que abre ao tocar em editar um compromisso existente, até a pessoa salvar com sucesso ou sair dela.
+- **Formulário de edição**: a tela que abre ao tocar em editar um compromisso existente. A pessoa **sai** dele ao salvar com sucesso ou ao voltar/fechar o formulário sem salvar; os demais casos em que ele deixa de estar visível seguem o RF-006.
 - **Lembrete retido**: lembrete do compromisso em edição cujo horário chegou com o formulário aberto.
 - **Compromisso encerrado**: compromisso sem dias de repetição que já terminou (RF-007).
 - **Período de chegada**: definido na spec 002 (do início do preparo até 2 h depois do evento).
@@ -107,7 +108,9 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 
 - Vários lembretes retidos → ao sair sem salvar, toca só o mais recente (CA-1.4), para não despejar notificações de uma vez (P5).
 - "Você está atrasado!" retido → é um lembrete como os outros: retido e, se for o mais recente, tocado ao sair; não toca se a saída já tiver sido confirmada (LEMB-08).
-- Editar durante o preparo → o salvar é recusado (COMP-07, sem mudança); ao sair, o lembrete retido toca (CA-1.6).
+- Editar durante o preparo → o salvar é recusado (COMP-07, sem mudança); ao sair, o lembrete retido toca (CA-1.6). Todo lembrete retido cai no preparo ou depois dele; por isso, com lembrete retido, só dá para salvar adiando o evento o bastante para o preparo voltar ao futuro (CA-1.3).
+- Qualquer recusa ao salvar (campos obrigatórios, "Rota não encontrada.", "Erro ao salvar.", falta de permissão de alarme) conta como não salvar: ao sair, vale o RF-003.
+- Chegada detectada durante a edição (se o RF-005 mantiver a detecção) → os lembretes são cancelados pela LEMB-09 e, ao sair, nenhum lembrete retido toca.
 - Lembrete já aberto quando a edição começa (ex.: "HORA DE SAIR" exibido às 9:15 e edição aberta às 9:16) → continua aberto; a retenção vale só para o que tocaria depois.
 - Compromisso desligado manualmente antes do evento → depois do evento continua desligado e religá-lo é bloqueado (RF-008).
 - Evento editado para o passado → já recusado ao salvar (COMP-07).
@@ -116,7 +119,7 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 
 - **CS-001**: zero lembretes do próprio compromisso tocando enquanto o formulário de edição dele está aberto.
 - **CS-002**: zero lembretes perdidos por causa da edição: todo lembrete retido é substituído pelo novo agendamento (salvou) ou tocado ao sair (não salvou).
-- **CS-003**: zero compromissos sem repetição encerrados aparecendo ativos, e zero lembretes antigos disparados ao mexer no switch.
+- **CS-003**: zero compromissos sem repetição encerrados aparecendo ativos, e zero lembretes antigos disparados ao tentar religar um compromisso sem repetição depois do evento.
 
 ## 11. Premissas e dependências
 
@@ -129,7 +132,14 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 
 - RF-005: detecção de chegada durante a edição — continua ou fica retida?
 - RF-006: sair do app com o formulário aberto — toca na hora ou continua retido?
-- RF-007: o compromisso termina no horário do evento ou ao fim do período de chegada?
+- RF-007: o compromisso termina no horário do evento ou ao fim do período de chegada? Na mesma decisão: o "desligado" automático mantém o atraso e a chegada que ainda estejam no prazo (estado "encerrado" diferente de "desligado")? E é gravado no término ou só aparece ao abrir a lista?
+
+Levantadas na revisão (sem marcador no texto; decidir no `/esclarecer`):
+- Religar **antes** do evento um compromisso desligado à mão (ex.: desliga 9:00, religa 9:20, saída 9:15) hoje dispara de uma vez etapas e saída passadas. Entra nesta spec (alinhando à regra da 003) ou fica como não-objetivo?
+- RF-003 depois do evento: quem fica no formulário até depois do horário do evento e sai sem salvar recebe algo? (a 003 não toca etapas nem saída depois do evento)
+- RF-003 com atraso mais recente que a saída: toca "Você está atrasado!" (notificação simples) ou "HORA DE SAIR" no estilo escolhido, se a saída não foi confirmada?
+- Editar um compromisso encerrado sem mudar a data mostra "Impossível! Atraso de 1440 min." (COMP-07): aceitar ou usar texto próprio?
+- Se o RF-007 ficar com o fim do período de chegada, o "Excluir após concluir" (COMP-14) apaga no horário do evento e corta a chegada: aceitar?
 
 ## 13. Esclarecimentos
 
@@ -140,14 +150,15 @@ Como **pessoa que olha a lista**, quero **que compromissos que já terminaram ap
 | Capacidade | Mudança |
 |---|---|
 | LEMB-12 (nova) | Lembretes durante a edição: RF-001 a RF-006; critérios `.a`–`.f` |
-| COMP-09 | Acrescenta a retenção dos lembretes enquanto o formulário está aberto (remete a LEMB-12) |
-| COMP-10 | Resolve a observação sobre religar compromisso passado: RF-007 a RF-009; critérios `.b`–`.e` |
+| COMP-09 | Acrescenta a retenção dos lembretes enquanto o formulário está aberto (remete a LEMB-12) e explicita que salvar com evento futuro deixa o compromisso ativo (RF-010) |
+| COMP-10 | Resolve e remove a observação sobre religar compromisso passado: RF-007 a RF-009; critérios `.b`–`.e` |
+| LEMB-09 | Conforme o RF-005: chegada durante a edição |
 | COMP-14 | Critério `.a` (sem mudança de comportamento) |
 
 ## Checklist de qualidade
 
 - [x] Sem detalhes de implementação (linguagens, frameworks, APIs, tabelas)
-- [x] Requisitos testáveis e sem ambiguidade
+- [ ] Requisitos testáveis e sem ambiguidade (pendente do `/esclarecer`)
 - [x] Critérios de sucesso mensuráveis
 - [x] Histórias priorizadas e independentes
 - [x] Casos de borda identificados

@@ -62,9 +62,9 @@ Sessão que retomou a 003 (validação em aparelho), aplicou dois ajustes aprova
 
 ## Próximos passos
 
-1. Rodar `revisor-de-spec` sobre a spec 005 e corrigir os bloqueantes que não dependem do Bruno; manter `status: rascunho`.
-2. Commitar `docs/sdd/roadmap.md` + a pasta da 005 (`docs(sdd): spec 005 em rascunho`), se o Bruno concordar.
-3. `/esclarecer` da 005 com as 3 questões: RF-005 (chegada durante a edição: continua ou retida?), RF-006 (sair do app com o formulário aberto: toca na hora ou segue retido? — P2 sugere tocar), RF-007 (termina no horário do evento ou ao fim do período de chegada, +2 h?). Validar também o texto proposto "Esse compromisso já passou. Edite a data para ativá-lo de novo." e a premissa de tocar só o lembrete mais recente.
+1. ~~Revisão da spec~~ — feita após esta passagem: os bloqueantes independentes do Bruno foram corrigidos (CA-1.3 reescrito para testar a retenção, RF-010 para reativar ao salvar, CS-003 restrito a "sem repetição, depois do evento", RF-006 com tela apagada/bloqueada, CAs com "em até 5 s"). As decisões que dependem dele estão em §12 da spec, abaixo das 3 questões marcadas.
+2. ~~Commit~~ — feito (`930dda6` + commit das correções da revisão).
+3. `/esclarecer` da 005 com as 3 questões marcadas e as 5 da revisão em §12: RF-005 (chegada durante a edição: continua ou retida?), RF-006 (sair do app com o formulário aberto: toca na hora ou segue retido? — P2 sugere tocar), RF-007 (termina no horário do evento ou ao fim do período de chegada, +2 h?). Validar também o texto proposto "Esse compromisso já passou. Edite a data para ativá-lo de novo." e a premissa de tocar só o lembrete mais recente.
 4. Em paralelo: resultados de M6–M10 no emulador → marcar no plano da 003 → `/validar 003`.
 
 ## Notas
