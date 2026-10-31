@@ -148,7 +148,8 @@ object Reagendador {
         manager.notify(CompromissoAlarmScheduler.ID_NOTIFICACAO_LEMBRETES_PAUSADOS, notification)
     }
 
-    private fun planoDe(c: CompromissoComEtapas, agora: Long, reinicio: Boolean): Reagendamento {
+    // Também usado pelo CompromissoViewModel (LEMB-12 ao liberar, COMP-10 ao religar)
+    fun planoDe(c: CompromissoComEtapas, agora: Long, reinicio: Boolean): Reagendamento {
         val compromisso = c.compromisso
         val horarios = calcularHorarios(
             compromisso.dataHoraEvento,

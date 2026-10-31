@@ -127,3 +127,27 @@ fun classificarPosicao(distanciaMetros: Float?, precisaoMetros: Float?): Posicao
     distanciaMetros <= RAIO_CHEGADA_METROS -> PosicaoChegada.DENTRO
     else -> PosicaoChegada.FORA
 }
+
+// LEMB-12 (RF-001, RF-004, RF-006): o lembrete é retido só se for do compromisso em edição
+// e o formulário estiver visível. Criação (idEmEdicao = null) nunca retém
+fun deveReter(compromissoId: Long, idEmEdicao: Long?, formularioVisivel: Boolean): Boolean =
+    idEmEdicao != null && compromissoId == idEmEdicao && formularioVisivel
+
+// LEMB-12 (RF-003, RF-006): ao liberar, toca o "HORA DE SAIR" só se algo foi retido e a regra
+// da 003 (plano com reinicio = true) considerar a saída perdida: saída passou, não confirmada,
+// chegada não registrada e evento ainda não começou
+fun deveTocarSaidaAoLiberar(houveRetencao: Boolean, plano: Reagendamento): Boolean =
+    houveRetencao && plano.saidaPerdida
+
+// COMP-10 (RF-007, RF-009): encerrado = sem dias de repetição e com o horário do evento alcançado
+fun estaEncerrado(diasRepeticao: String, dataHoraEvento: Long, agora: Long): Boolean =
+    diasRepeticao.isBlank() && agora >= dataHoraEvento
+
+enum class DecisaoAoLigar { BLOQUEAR_PASSADO, BLOQUEAR_PERMISSAO, LIGAR }
+
+// COMP-10 (RF-008): o bloqueio de compromisso passado vem antes da exigência de alarme exato (LEMB-10)
+fun decisaoAoLigar(encerrado: Boolean, podeAgendarExato: Boolean): DecisaoAoLigar = when {
+    encerrado -> DecisaoAoLigar.BLOQUEAR_PASSADO
+    !podeAgendarExato -> DecisaoAoLigar.BLOQUEAR_PERMISSAO
+    else -> DecisaoAoLigar.LIGAR
+}

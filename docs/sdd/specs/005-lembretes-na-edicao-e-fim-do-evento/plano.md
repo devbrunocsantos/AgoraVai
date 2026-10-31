@@ -3,7 +3,7 @@ spec: docs/sdd/specs/005-lembretes-na-edicao-e-fim-do-evento/spec.md
 pesquisa: docs/sdd/specs/005-lembretes-na-edicao-e-fim-do-evento/pesquisa.md
 data: 2026-10-30
 commit_base: e45fbfd600eed39a6e5907217635f51dc67ffc09
-status: rascunho  # rascunho | aprovado | em-implementacao | concluido
+status: em-implementacao  # rascunho | aprovado | em-implementacao | concluido
 ---
 
 # Plano de implementação: Lembretes durante a edição e compromisso encerrado
@@ -119,9 +119,9 @@ fun decisaoAoLigar(encerrado: Boolean, podeAgendarExato: Boolean): DecisaoAoLiga
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug` verde, sem falha em nenhum teste existente (linha de base: 30/30 em 2026-10-30)
-- [ ] `EdicaoLembretesTest` cobre CA-1.1, 1.2, 1.4, 1.5, 1.6, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13
-- [ ] `EncerramentoTest` cobre CA-2.1, 2.2, 2.3, 2.4, 2.7, 2.8, 2.9, 2.10, 2.11 e a regressão da LEMB-10 (evento futuro sem permissão → `BLOQUEAR_PERMISSAO`)
+- [x] `./gradlew testDebugUnitTest assembleDebug` verde, sem falha em nenhum teste existente (linha de base: 30/30 em 2026-10-30) ✅ 55/55
+- [x] `EdicaoLembretesTest` cobre CA-1.1, 1.2, 1.4, 1.5, 1.6, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13
+- [x] `EncerramentoTest` cobre CA-2.1, 2.2, 2.3, 2.4, 2.7, 2.8, 2.9, 2.10, 2.11 e a regressão da LEMB-10 (evento futuro sem permissão → `BLOQUEAR_PERMISSAO`)
 
 #### Verificação manual
 - Nenhuma (sem mudança de comportamento).
@@ -482,3 +482,5 @@ Sem migração de dados. Cada fase é um commit; rollback = reverter o commit da
 ## Registro da implementação
 
 <!-- Preenchido por /implementar -->
+
+- **Fase 1 (2026-10-30):** regras puras em `notifications/HorariosLembrete.kt` (`deveReter`, `deveTocarSaidaAoLiberar`, `estaEncerrado`, `DecisaoAoLigar`/`decisaoAoLigar`); `Reagendador.planoDe` público. Testes `EdicaoLembretesTest` (13) e `EncerramentoTest` (12); `testDebugUnitTest assembleDebug` → 55/55.
