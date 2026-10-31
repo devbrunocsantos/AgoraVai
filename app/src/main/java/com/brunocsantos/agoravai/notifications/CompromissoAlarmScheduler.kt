@@ -115,6 +115,14 @@ object CompromissoAlarmScheduler {
         alarmManager.cancel(pendingVerificacaoAtraso(context, compromissoId))
     }
 
+    // LEMB-11.e: sem alarme exato, a chegada é ativada por alarme inexato, que não exige
+    // permissão. Pode atrasar alguns minutos em Doze, mas é a reativação no início do
+    // período que detecta quem já está no destino (INITIAL_TRIGGER_ENTER)
+    fun agendarAtivacaoChegadaInexata(context: Context, compromissoId: Long, horario: Long) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, horario, pendingAtivacaoChegada(context, compromissoId))
+    }
+
     // LEMB-11.e: sem alarme exato, a saída perdida é entregue na hora, sem passar pelo AlarmManager
     fun dispararSaidaAgora(context: Context, compromisso: Compromisso, itens: List<String>) {
         context.sendBroadcast(intentSaida(context, compromisso, itens))

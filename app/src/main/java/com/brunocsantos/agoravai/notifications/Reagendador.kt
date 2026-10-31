@@ -84,9 +84,14 @@ object Reagendador {
                     CompromissoAlarmScheduler.reagendar(context, c.compromisso, c.etapas, itens, plano)
                 } else {
                     CompromissoAlarmScheduler.cancelar(context, c.compromisso.id, c.etapas.size)
-                    // A detecção de chegada não depende de alarme: é ativada direto (LEMB-11, RF-003)
-                    if (plano.ativacaoChegada != null) {
-                        CompromissoGeofenceManager.addGeofenceChegada(c.compromisso, c.etapas)
+                    // RF-003: no período, a chegada é ativada direto; antes dele, por alarme inexato,
+                    // para a reativação no início do preparo pegar quem já estiver no destino
+                    plano.ativacaoChegada?.let { ativacao ->
+                        if (ativacao <= agora) {
+                            CompromissoGeofenceManager.addGeofenceChegada(c.compromisso, c.etapas)
+                        } else {
+                            CompromissoAlarmScheduler.agendarAtivacaoChegadaInexata(context, c.compromisso.id, ativacao)
+                        }
                     }
                     if (plano.saidaPerdida) {
                         CompromissoAlarmScheduler.dispararSaidaAgora(context, c.compromisso, itens)

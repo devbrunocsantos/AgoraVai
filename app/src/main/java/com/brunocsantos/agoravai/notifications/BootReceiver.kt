@@ -17,7 +17,7 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         // Só no reinício o aparelho esteve desligado e pode ter perdido a saída (LEMB-11.f)
         val reinicio = when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED -> true
+            Intent.ACTION_BOOT_COMPLETED, ACTION_QUICKBOOT_POWERON -> true
             Intent.ACTION_MY_PACKAGE_REPLACED -> false
             else -> return
         }
@@ -34,5 +34,10 @@ class BootReceiver : BroadcastReceiver() {
                 pendingResult.finish()
             }
         }
+    }
+
+    companion object {
+        // Alguns fabricantes antigos avisam o fim do boot com esta ação em vez de BOOT_COMPLETED
+        const val ACTION_QUICKBOOT_POWERON = "android.intent.action.QUICKBOOT_POWERON"
     }
 }
