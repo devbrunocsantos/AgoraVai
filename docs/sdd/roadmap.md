@@ -33,6 +33,9 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | — | Permissão de tela cheia (Android 14) no diagnóstico (SIS-05) | Could | médio | P | 001 | ideia |
 | — | Decidir billing (DT-09) | Could | — | P | — | ideia — decisão de produto |
 | — | Proteger a chave da Directions API e usar trânsito (DT-10) | Could | médio | M | — | ideia |
+| — | Botões editar/excluir do último card ficam atrás do "+" (DT-22, COMP-12) | Should | médio | P | — | ideia — prioridade proposta |
+| — | Busca de local do Pomodoro só abre uma vez por sessão (DT-23, AUTO-03) | Should | médio | P | — | ideia — prioridade proposta |
+| — | Visual do "Agora Vai..." e da frase do topo (SIS-02) | Could | baixo | P | — | ideia — precisa do visual desejado |
 | — | Higiene de build e UI (DT-11, DT-12, DT-13, DT-15) | Could | baixo | P | — | ideia |
 
 ## Em andamento
@@ -57,6 +60,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 2026-10-30 | 005: religar antes do evento um compromisso desligado à mão entra na spec, com a regra da 003 | Mesmo defeito da História 2 | RF-011; esforço P → M |
 | 2026-10-30 | 005 (plano): reter no disparo; encerrado calculado sem mudar o banco; religar pela regra da 003 respeitando confirmações; liberar só se houve retenção | Segurança na falha (P2) e dados preservados (P3) | `plano.md` da 005 |
 | 2026-10-29 | Reescrever as 4 specs no template novo; `implement.md` mesclado no `plano.md` | Padronizar os artefatos | CAs citam o ID antigo (`CA-1.4 (LEMB-09.f)`) |
+| 2026-11-03 | Merge da `origin/ccr-80e3a1a2-ocxhin` (2 commits de 2026-10-29 na estrutura antiga `specs/`): manter a estrutura `docs/sdd/` e o DT-01 em 🧪; trazer DT-22, DT-23 e o pedido de visual | Não perder os achados dos testes em aparelho nem ressuscitar a pasta migrada | `arquitetura.md` 1.9, capacidades, backlog |
 
 ## Riscos
 | Risco | Probabilidade | Impacto | Mitigação | Dono | Status |

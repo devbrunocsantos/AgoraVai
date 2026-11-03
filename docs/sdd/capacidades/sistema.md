@@ -16,6 +16,8 @@ abrir na aba Pomodoro.
 O topo DEVE mostrar "Agora Vai..." e uma frase de complemento ("...dar certo.").
 A frase DEVE mudar uma vez por dia e ser diferente da do dia anterior.
 
+- 💡 Pedido de melhoria (2026-10-29): deixar o "Agora Vai..." e a frase do topo mais bonitos. Precisa de spec própria com o visual desejado.
+
 ### SIS-03 · Permissões na primeira execução — ✅
 Ao abrir, o sistema DEVE pedir as permissões que faltarem: notificações
 (Android 13+), localização precisa e depois localização em segundo plano (com
