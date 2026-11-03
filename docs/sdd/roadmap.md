@@ -33,8 +33,8 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | — | Permissão de tela cheia (Android 14) no diagnóstico (SIS-05) | Could | médio | P | 001 | ideia |
 | — | Decidir billing (DT-09) | Could | — | P | — | ideia — decisão de produto |
 | — | Proteger a chave da Directions API e usar trânsito (DT-10) | Could | médio | M | — | ideia |
-| — | Botões editar/excluir do último card ficam atrás do "+" (DT-22, COMP-12) | Should | médio | P | — | ideia — prioridade proposta |
-| — | Busca de local do Pomodoro só abre uma vez por sessão (DT-23, AUTO-03) | Should | médio | P | — | ideia — prioridade proposta |
+| — | Botões editar/excluir do último card ficam atrás do "+" (DT-22, COMP-12) | Should | médio | P | — | ideia |
+| — | Busca de local do Pomodoro só abre uma vez por sessão (DT-23, AUTO-03) | Should | médio | P | — | ideia |
 | — | Visual do "Agora Vai..." e da frase do topo (SIS-02) | Could | baixo | P | — | ideia — precisa do visual desejado |
 | — | Higiene de build e UI (DT-11, DT-12, DT-13, DT-15) | Could | baixo | P | — | ideia |
 
