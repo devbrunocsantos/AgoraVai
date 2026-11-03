@@ -2,6 +2,7 @@ package com.brunocsantos.agoravai.ui.compromissos
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
@@ -289,6 +290,9 @@ class CompromissoViewModel(private val dao: AppDao, private val applicationConte
                         dao.excluirItensPorCompromissoId(currentState.id)
                         CompromissoGeofenceManager.removeGeofence(currentState.id)
                         CompromissoAlarmScheduler.cancelar(context, currentState.id, 10)
+                        // LEMB-12 (RF-002): fecha o "HORA DE SAIR" do agendamento antigo que ainda estiver na bandeja
+                        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                            .cancel(CompromissoAlarmScheduler.idAlarmeSaida(currentState.id))
                         currentState.id
                     }
 

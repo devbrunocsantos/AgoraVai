@@ -1,6 +1,6 @@
 # Roadmap: Agora Vai
 
-> Atualizado em: 2026-10-30
+> Atualizado em: 2026-11-03
 
 ## Visão
 Um app em que o usuário confia de olhos fechados para sair na hora: nenhum
@@ -22,7 +22,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 | 001 | Lembrete de saída confiável (DT-02, 06, 16, 17, 19) | Must | alto | M | — | implementada — faltam A4, R4 |
 | 002 | Detecção de chegada (DT-01, DT-20) | Must | alto | M | 001 | implementada — B5/B6 ✅; faltam R4, R5 |
 | 003 | Reagendar após reiniciar ou atualizar (DT-05) | Must | alto | M | 001, 002 | implementada — M1–M5 ✅ (2026-10-30); faltam M6–M10 no emulador → `/validar 003` |
-| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-11, LEMB-12) | Must | alto | M | 001, 002, 003 | planejada — aprovar o plano → `/implementar 005` |
+| 005 | Lembretes durante a edição e compromisso encerrado (COMP-10, LEMB-11, LEMB-12) | Must | alto | M | 001, 002, 003 | em implementação — Fases 1–3 de 5 (manuais das Fases 2–3 pendentes) |
 | — | Endereço inexistente aceito com 0 min de percurso (DT-21, COMP-05) | Must | alto | P | — | ideia |
 | — | Migrações reais do Room (DT-03, P3) | Must | alto | M | — | ideia — **antes de qualquer mudança de schema** |
 | 004 | Pomodoro: meta da sessão e progresso (DT-07, 08, 18) | Should | médio | M | — | rascunho (pesquisa/plano prévios) |
@@ -39,7 +39,7 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 - **001** — validação — rodar A4 (Android 14) e R4 (Android 12/12L) e então `/validar 001`.
 - **002** — validação — B5 e B6 ✅; faltam R4 e R5 (ver risco DT-21) e então `/validar 002`.
 - **003** — validação — M1–M5 ✅ e ajustes QUICKBOOT/alarme inexato (`1da2e03`); rodar M6–M10 no emulador e então `/validar 003`.
-- **005** — planejada (5 fases) — aprovar `plano.md` e então `/implementar 005`.
+- **005** — implementação, Fase 3/5 (automatizada ✅) — roteiros manuais A1–C4 (Fase 2) e C5–C7 (Fase 3) com o Bruno; depois Fase 4 (encerrado/religar) e Fase 5 (capacidades).
 
 ## Decisões
 | Data | Decisão | Motivo | Impacto |
@@ -70,5 +70,5 @@ lembrete falha em silêncio (P2) e nenhum dado se perde (P3). Próximo marco:
 ## Próximos passos
 1. Rodar no aparelho A4 e R4 (001) e R4 e R5 (002) → `/validar 001` e `/validar 002`.
 2. Rodar M1–M10 (003) em aparelho → `/validar 003`.
-3. `/pesquisar 005` (sessão nova) → `/planejar 005`.
+3. 005: roteiros manuais das Fases 2–3 → Fases 4 e 5 → `/validar 005`.
 4. Especificar DT-21.

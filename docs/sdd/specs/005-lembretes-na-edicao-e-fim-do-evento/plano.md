@@ -278,7 +278,7 @@ RF-002: ao salvar, o "HORA DE SAIR" do agendamento antigo que ainda estiver na b
 ### Critérios de sucesso
 
 #### Verificação automatizada
-- [ ] `./gradlew testDebugUnitTest assembleDebug` verde
+- [x] `./gradlew testDebugUnitTest assembleDebug` verde ✅ 55/55
 
 #### Verificação manual
 - [ ] **C5 — CA-1.14:** tipo PADRAO, deixar o "HORA DE SAIR" aparecer em S sem tocar "Já Saí"; em S+1 abrir a edição, adiar o evento 30 min e salvar → a notificação some e o novo "HORA DE SAIR" é agendado (`dumpsys alarm`).
@@ -487,3 +487,4 @@ Sem migração de dados. Cada fase é um commit; rollback = reverter o commit da
 
 - **Fase 1 (2026-10-30):** regras puras em `notifications/HorariosLembrete.kt` (`deveReter`, `deveTocarSaidaAoLiberar`, `estaEncerrado`, `DecisaoAoLigar`/`decisaoAoLigar`); `Reagendador.planoDe` público. Testes `EdicaoLembretesTest` (13) e `EncerramentoTest` (12); `testDebugUnitTest assembleDebug` → 55/55.
 - **Fase 2 (2026-10-30):** `services/EdicaoEmAndamento.kt`; `EXTRA_SEM_RETENCAO`; etapa leva `EXTRA_COMPROMISSO_ID`; `AlarmReceiver` e `CHECK_LATE` consultam a retenção; formulário no VM (`formularioAberto`, `abrirCriacao`, `abrirEdicao`, `fecharSemSalvar`, `formularioSaiuDaTela`, `formularioVoltouATela`, `onCleared`); liberação em `escopoLiberacao`; `MainActivity` usa o estado do VM e chama o VM no `onStart`/`onStop`. Desvio: contador `sessaoFormulario` em vez de cancelar o `Job` (ver Decisões). Revisão de código: a finalização do salvar e as mensagens de erro também conferem a sessão (um salvamento antigo não fecha nem mostra erro no formulário seguinte). 55/55.
+- **Fase 3 (2026-11-03):** `ui/compromissos/CompromissoViewModel.kt`, ramo de edição do salvar — após `CompromissoAlarmScheduler.cancelar`, `NotificationManager.cancel(idAlarmeSaida(id))` (`// LEMB-12 (RF-002)`). Só no salvamento bem-sucedido: o "Impossível! Atraso" (A2) retorna antes e mantém a notificação. Implementada em paralelo aos roteiros manuais da Fase 2 (aprovação do Bruno). 55/55, `assembleDebug` ok.
